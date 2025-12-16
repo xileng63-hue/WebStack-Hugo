@@ -4,7 +4,7 @@
   icon: far fa-star
   links: 
     - title: 百度
-      logo: <img src="https://favicon.im/baidu.com" alt="baidu.com favicon" />
+      logo:https://www.baidu.com/favicon/www.baidu.com.png
       url: https://www.baidu.com/
       description: 国产老6。
     - title: QQ 邮箱
