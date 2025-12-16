@@ -1,4 +1,4 @@
-baseURL               = "https://webstack-hugo.weiyan.cc/"
+baseURL               = "https://stupendous-douhua-4a5fe6.netlify.app/"
 languageCode          = "zh-CN"
 title                 = "WebStack-Hugo 网址导航"
 theme                 = "WebStack-Hugo"
