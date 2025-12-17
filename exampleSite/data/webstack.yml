@@ -41,17 +41,17 @@
       qrcode: qrcode.jpg
       description: 微信公众号：BioIT 爱好者！
     - title: 爱给网
-          logo: "https://api.iowen.cn/favicon/www.aigei.com.png"
-          url: "https://www.aigei.com/"
-          description: "专注免费素材，音效配乐视频下载"
+          logo: https://favicon.im/www.aigei.com?larger=true" alt="www.aigei.com favicon
+          url: https://www.aigei.com/
+          description: 专注免费素材，音效配乐视频下载
     - title: 花瓣网
-          logo: "https://api.iowen.cn/favicon/huaban.com.png"
-          url: "https://huaban.com/"
-          description: "设计师寻找灵感与素材的平台"
+          logo: https://favicon.im/huaban.com?larger=true" alt="huaban.com favicon
+          url: https://huaban.com/
+          description: 设计师寻找灵感与素材的平台
     - title: 豆哥配音
-          logo: "https://api.iowen.cn/favicon/www.douge.com.png"
-          url: "https://www.douge.com/index"
-          description: "好用的AI智能语音合成工具"
+          logo: https://favicon.im/www.douge.com?larger=true" alt="www.douge.com favicon
+          url: https://www.douge.com
+          description: 好用的AI智能语音合成工具
 
 
 - taxonomy: AI
@@ -72,7 +72,7 @@
           url: https://3d.hunyuan.tencent.com/
           description: 腾讯旗下AI3D建模
         - title: gemini3pro
-          logo: https://favicon.im/emini.google.com?larger=true" alt="emini.google.com favicon
+          logo: https://favicon.im/gemini.google.com?larger=true" alt="gemini.google.com favicon
           url: https://gemini.google.com/
           description: gemini3pro
 
