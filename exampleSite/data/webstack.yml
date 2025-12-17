@@ -75,6 +75,10 @@
           logo: https://favicon.im/gemini.google.com?larger=true" alt="gemini.google.com favicon
           url: https://gemini.google.com/
           description: gemini3pro
+        - title: sora2
+          logo: https://api.iowen.cn/favicon/sora.chatgpt.com/explore
+          url: https://sora.chatgpt.com/explore
+          description: sora2
 
           
     - term: 云服务器
