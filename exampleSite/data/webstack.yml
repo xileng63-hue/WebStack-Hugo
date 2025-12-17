@@ -6,7 +6,7 @@
     - title: 百度
       logo: https://favicon.im/WWW.baidu.com?larger=true" alt="WWW.baidu.com favicon
       url: https://www.baidu.com/
-      description: 国产老6。
+      description: 国产搜索
     - title: QQ 邮箱
       logo: qq邮箱.png
       url: http://mail.qq.com/
@@ -42,14 +42,14 @@
       description: 微信公众号：BioIT 爱好者！
 
 
-- taxonomy: 科研办公
+- taxonomy: AI
   icon: fas fa-flask fa-lg
   list:
-    - term: 生物信息
+    - term: AI
       links:
-        - title: NCBI
-          logo: ncbi.jpg
-          url: https://www.ncbi.nlm.nih.gov/
+        - title: 即梦
+          logo: https://favicon.im/jimeng.jianying.com?larger=true" alt="jimeng.jianying.com favicon
+          url: https://jimeng.jianying.com
           description: National Center for Biotechnology Information.
         - title: Bioconda
           logo: bioconda.jpg
