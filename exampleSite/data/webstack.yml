@@ -301,7 +301,7 @@
           description: 免费素材共享平台。
     - term: 字体资源
       links:
-       - title: 字体天下
+        - title: 字体天下
           url: https://www.fonts.net.cn/
           logo: https://favicon.im/www.fonts.net.cn?larger=true" alt="www.fonts.net.cn favicon
           description: Making the web more beautiful, fast, and open through great typography.
