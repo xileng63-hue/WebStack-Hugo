@@ -77,7 +77,8 @@
           description: 快手推出的高品质AI视频生成工具
 
           
-     - term: 国外Ai
+    - term: 国外Ai
+      links:
         - title: Gemini3pro
           logo: https://favicon.im/gemini.google.com?larger=true" alt="gemini.google.com favicon
           url: https://gemini.google.com/
