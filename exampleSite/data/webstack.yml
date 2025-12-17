@@ -52,7 +52,7 @@
 - taxonomy: AI工具
   icon: fas fa-flask fa-lg
   list:
-    - term: 国产Ai 
+    - term: 国产AI
       links:
         - title: 即梦
           logo: https://favicon.im/jimeng.jianying.com?larger=true" alt="jimeng.jianying.com favicon
@@ -74,7 +74,7 @@
           logo: https://favicon.im/app.klingai.com?larger=true" alt="app.klingai.com favicon
           url: https://app.klingai.com/
           description: 快手推出的高品质AI视频生成工具 
-    - term: 国外Ai 
+    - term: 国外AI
       links:
         - title: Gemini3pro
           logo: https://favicon.im/gemini.google.com?larger=true" alt="gemini.google.com favicon
