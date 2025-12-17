@@ -63,18 +63,8 @@
           logo: https://favicon.im/emini.google.com?larger=true" alt="emini.google.com favicon
           url: https://gemini.google.com/
           description: gemini3pro
-        - title: Galaxy Project
-          logo: galaxy_project.png
-          url: https://galaxyproject.org/
-          description: Galaxy Community Hub.
-        - title: R Project
-          logo: r-project.jpg
-          url: https://www.r-project.org/
-          description: https://www.r-project.org
-        - title: Bioconductor
-          logo: bioconductor.jpg
-          url: http://www.bioconductor.org/
-          description: http://www.bioconductor.org
+
+          
     - term: 云服务器
       links:
         - title: 阿里云
