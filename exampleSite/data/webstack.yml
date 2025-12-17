@@ -50,15 +50,19 @@
         - title: 即梦
           logo: https://favicon.im/jimeng.jianying.com?larger=true" alt="jimeng.jianying.com favicon
           url: https://jimeng.jianying.com
-          description: National Center for Biotechnology Information.
-        - title: Bioconda
-          logo: bioconda.jpg
-          url: https://anaconda.org/bioconda/
-          description: "Bioconda :: Anaconda.org."
-        - title: CPAN
-          logo: cpan.jpg
-          url: https://metacpan.org/
-          description: Search the CPAN.
+          description: 国产字节旗下ai工具
+         - title: deepseek
+          logo: https://favicon.im/chat.deepseek.com?larger=true" alt="chat.deepseek.com favicon
+          url: https://chat.deepseek.com/
+          description: 国产AI工具
+        - title: 腾讯混元3D
+          logo: https://favicon.im/3d.hunyuan.tencent.com?larger=true" alt="3d.hunyuan.tencent.com favicon
+          url: https://3d.hunyuan.tencent.com/
+          description: 腾讯旗下AI3D建模
+        - title: gemini3pro
+          logo: https://favicon.im/emini.google.com?larger=true" alt="emini.google.com favicon
+          url: https://gemini.google.com/
+          description: gemini3pro
         - title: Galaxy Project
           logo: galaxy_project.png
           url: https://galaxyproject.org/
@@ -307,6 +311,10 @@
           description: 免费素材共享平台。
     - term: 字体资源
       links:
+       - title: 字体天下
+          url: https://www.fonts.net.cn/
+          logo: https://favicon.im/www.fonts.net.cn?larger=true" alt="www.fonts.net.cn favicon
+          description: Making the web more beautiful, fast, and open through great typography.
         - title: Google Font
           url: https://fonts.google.com/
           logo: googlefont.png
