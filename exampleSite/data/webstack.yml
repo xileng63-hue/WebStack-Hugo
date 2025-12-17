@@ -23,10 +23,6 @@
       logo: github.png
       url: https://github.com/
       description: GitHub 开源社区。
-    - title: 搜狗微信
-      logo: 搜狗微信.jpg
-      url: https://weixin.sogou.com/
-      description: 搜狗微信搜索，一搜即达。
     - title: 知乎
       logo: 知乎.png
       url: https://www.zhihu.com/
@@ -79,6 +75,15 @@
           logo: https://favicon.im/sora.chatgpt.com?larger=true" alt="sora.chatgpt.com favicon
           url: https://sora.chatgpt.com/
           description: sora2
+        - title: viggle
+          logo: https://favicon.im/viggle.ai/login?larger=true" alt="viggle.ai/login favicon
+          url: https://viggle.ai/login
+          description: viggle人物换皮
+        - title: chatgpt
+          logo: https://favicon.im/chatgpt.com?larger=true" alt="chatgpt.com/login favicon
+          url: https://chatgpt.com/
+          description: chatgpt
+        
           
 - taxonomy: 悠闲娱乐
   icon: fas fa-film fa-lg
