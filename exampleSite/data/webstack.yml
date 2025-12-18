@@ -92,12 +92,20 @@
           logo: https://favicon.im/chatgpt.com?larger=true" alt="chatgpt.com/login favicon
           url: https://chatgpt.com/
           description: chatgpt
+        - title: noiz.ai
+          logo: https://favicon.im/www.douyin.com?larger=true" alt="www.douyin.com favicon
+          url: https://noiz.ai/voice/lib
+          description: ai配音
           
 - taxonomy: 悠闲娱乐
   icon: fas fa-film fa-lg
   list:
     - term: 影音视频
-      links:
+      links:   
+        - title: 抖音网页版
+          logo: https://favicon.im/www.douyin.com?larger=true" alt="www.douyin.com favicon
+          url: https://www.douyin.com/
+          description: 记录美好生活
         - title: 腾讯视频
           logo: 腾讯视频.png
           url: http://v.qq.com/
