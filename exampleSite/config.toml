@@ -13,8 +13,7 @@ publishDir            = "public"				# 站点静态文件保存目录
     author        = "占豪杰"
     description   = "占豪杰网址导航"
     footer.copyright = '''
-    <!-- 这是一个悬浮在右上角的天气插件 -->
-    <div style="position: fixed; top: 10px; right: 20px; z-index: 9999; opacity: 0.9;">
+  <div style="position: fixed; top: 10px; right: 20px; z-index: 9999; opacity: 0.9;">
     <iframe scrolling="no" src="https://tianqiapi.com/api.php?style=tp&skin=pitaya" frameborder="0" width="200" height="24" allowtransparency="true"></iframe>
     </div>
     <br>
