@@ -48,15 +48,12 @@ publishDir            = "public"				# 站点静态文件保存目录
 
 [params.footer]
     copyright = '本站内容源自互联网，如有内容侵犯了你的权益，请联系删除相关内容，联系邮箱：614679800@qq.com'
-    # ↓↓↓↓↓↓ 从这里开始复制 ↓↓↓↓↓↓
-footer = '''
-<!-- 这是一个悬浮在右上角的天气插件 -->
-<div style="position: fixed; top: 10px; right: 20px; z-index: 9999; opacity: 0.9;">
-  <iframe scrolling="no" src="https://tianqiapi.com/api.php?style=tp&skin=pitaya" frameborder="0" width="200" height="24" allowtransparency="true"></iframe>
-</div>
-
-<br>
-<!-- 这里是底部的版权文字，你可以改成自己的名字 -->
-© 2025 我的专属导航站
-'''
-# ↑↑↑↑↑↑ 复制到这里结束 ↑↑↑↑↑↑
+    footer = '''
+    <!-- 这是一个悬浮在右上角的天气插件 -->
+    <div style="position: fixed; top: 10px; right: 20px; z-index: 9999; opacity: 0.9;">
+    <iframe scrolling="no" src="https://tianqiapi.com/api.php?style=tp&skin=pitaya" frameborder="0" width="200" height="24" allowtransparency="true"></iframe>
+    </div>
+    <br>
+    <!-- 这里是底部的版权文字，你可以改成自己的名字 -->
+    © 2025 我的专属导航站
+    '''
