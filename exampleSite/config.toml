@@ -22,37 +22,7 @@ publishDir            = "public"				# 站点静态文件保存目录
     nightMode     = false					# 默认站点为深色(夜间)模式
     yiyan         = true                         		# 默认启用一言服务
     fancybox      = true                                        # 使用 Fancybox 实现图片灯箱/放大功能
-    footer = '''
-<div id="he-plugin-simple"></div>
-<script>
-WIDGET = {
-  "CONFIG": {
-    "modules": "01234",
-    "background": "5",
-    "tmpColor": "4A4A4A",
-    "tmpSize": "16",
-    "cityColor": "4A4A4A",
-    "citySize": "16",
-    "aqiColor": "4A4A4A",
-    "aqiSize": "16",
-    "weatherIconSize": "24",
-    "alertIconSize": "18",
-    "padding": "10px 10px 10px 10px",
-    "shadow": "0",
-    "language": "auto",
-    "fixed": "true",
-    "vertical": "top",
-    "horizontal": "left",
-    "left": "220",
-    "top": "15",
-    "key": "a9229419102347bda74362145e69e000"
-  }
-}
-</script>
-<script src="https://widget.qweather.net/simple/static/js/he-simple-common.js?v=2.0"></script>
-<br>
-© 2025 https://xileng63-hue-webstack-hugo.vercel.app/
-'''
+
 [params.seo]    
     baiduhmid       = 'efccc04cb44fc49faddac5876180b369'	# 百度统计 hm.src 的 ID
     baiduSiteVer    = 'codeva-cCAOSG8MBO'			# 百度HTML标签验证(baidu-site-verification)
