@@ -36,14 +36,6 @@
       url: https://www.bioitee.com
       qrcode: qrcode.jpg
       description: 微信公众号：BioIT 爱好者！
-    - title: 爱给网
-      logo: https://favicon.im/www.aigei.com?larger=true" alt="www.aigei.com favicon
-      url: https://www.aigei.com/
-      description: 专注免费素材，音效配乐视频下载
-    - title: 花瓣网
-      logo: https://favicon.im/huaban.com?larger=true" alt="huaban.com favicon
-      url: https://huaban.com/
-      description: 设计师寻找灵感与素材的平台
     - title: 豆哥配音
       logo: https://favicon.im/www.douge.com?larger=true" alt="www.douge.com favicon
       url: https://www.douge.com
@@ -146,7 +138,19 @@
           logo: https://favicon.im/www.meijumi.net?larger=true" alt="www.meijumi.net favicon
           url:  https://www.meijumi.net/
           description: 美剧迷
-
+        - title: youtube
+          logo: https://favicon.im/www.youtube.com?larger=true" alt="www.youtube.com favicon
+          url:  https://www.youtube.com/
+          description: youtube 全球最大视频网站
+        - title: youtube
+          logo: https://favicon.im/www.youtube.com?larger=true" alt="www.youtube.com favicon
+          url:  https://www.youtube.com/
+          description: youtube 全球最大视频网站
+        - title: 抖音国际版
+          logo: https://favicon.im/www.douyin.com?larger=true" alt="www.douyin.com favicon
+          url:  https://www.tiktok.com/
+          description: 记录美好生活
+          
           
     - term: 游戏竞技
       links:
@@ -278,6 +282,10 @@
           description: Search & download thousands of logos instantly.
     - term: 平面素材
       links:
+        - title: 花瓣网
+          logo: https://favicon.im/huaban.com?larger=true" alt="huaban.com favicon
+          url: https://huaban.com/
+          description: 设计师寻找灵感与素材的平台  
         - title: freepik
           logo: freepik.png
           url: https://www.freepik.com/
@@ -330,6 +338,16 @@
           logo: sccnn.png
           url: http://www.sccnn.com/
           description: 免费素材共享平台。
+    - term: 音效资源
+      links:
+        - title: 爱给网
+          logo: https://favicon.im/www.aigei.com?larger=true" alt="www.aigei.com favicon
+          url: https://www.aigei.com/
+          description: 专注免费素材，音效配乐视频下载
+        - title: 自由声音
+          logo: https://favicon.im/freesound.or?larger=true" alt="freesound.or favicon
+          url: https://freesound.org/
+          description: 随便找你喜欢的声音        
     - term: 字体资源
       links:
         - title: 字体天下
