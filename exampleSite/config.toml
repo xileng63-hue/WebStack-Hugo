@@ -12,6 +12,7 @@ publishDir            = "public"				# 站点静态文件保存目录
 [params]
     author        = "占豪杰"
     description   = "占豪杰网址导航"
+    footer = { copyright = '''<div style="position:fixed;top:10px;right:10px;z-index:99999;background:rgba(255,255,255,0.8);border-radius:5px;padding:2px;"><iframe scrolling="no" src="https://tianqiapi.com/api.php?style=tp&skin=pitaya" frameborder="0" width="180" height="24" allowtransparency="true"></iframe></div><br>© 2025''' }
     upload        = ""
     about         = "https://github.com/shenweiyan/Knowledge-Garden/discussions/10"	          # 左侧导航栏的"关于导航"页面(./about)
     repository    = "https://github.com/shenweiyan/WebStack-Hugo"  
@@ -45,11 +46,4 @@ publishDir            = "public"				# 站点静态文件保存目录
     
 [markup.goldmark.renderer]
     unsafe = true
-[params.footer]
-    copyright ='''
-  <div style="position: fixed; top: 10px; right: 20px; z-index: 9999; opacity: 0.9;">
-    <iframe scrolling="no" src="https://tianqiapi.com/api.php?style=tp&skin=pitaya" frameborder="0" width="200" height="24" allowtransparency="true"></iframe>
-  </div>
-  <br>
-  © 2025 本站内容源自互联网，如有内容侵犯了你的权益，请联系删除相关内容，联系邮箱：614679800@qq.com
-  '''
+
