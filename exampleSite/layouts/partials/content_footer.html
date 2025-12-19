@@ -1,14 +1,117 @@
 <footer class="main-footer footer-type-1 text-xs">
     <div id="footer-tools" class="d-flex flex-column">
         
-        <!-- 天气组件：顶部居中悬浮 -->
-        <!-- top: 15px (距离顶部) -->
-        <!-- left: 50% + transform: translateX(-50%) (这是 CSS 经典的绝对居中写法) -->
-        <!-- z-index: 99999 (确保它浮在导航栏的最上层，不被遮挡) -->
-        <div style="position: fixed; top: 15px; left: 50%; transform: translateX(-50%); z-index: 99999; background: rgba(255,255,255,0.95); border-radius: 20px; padding: 0px 10px; box-shadow: 0 2px 12px rgba(0,0,0,0.15); height: 30px; display: flex; align-items: center; overflow: hidden; border: 1px solid #eee;">
-           <!-- 依然使用中国天气网的稳定源 -->
-           <iframe scrolling="no" src="https://i.tianqi.com/index.php?c=code&id=10&color=%23333&icon=1" frameborder="0" width="220" height="25" allowtransparency="true"></iframe>
+        <!-- ======================================================= -->
+        <!-- 顶部信息胶囊：天气 + 农历时间 -->
+        <!-- ======================================================= -->
+        <div id="info-capsule" style="
+            position: fixed; 
+            top: 15px; 
+            left: 50%; 
+            transform: translateX(-50%); 
+            z-index: 99999;
+            
+            /* 磨砂玻璃特效 */
+            background: rgba(255, 255, 255, 0.85); /* 稍微调高不透明度，增强文字对比 */
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); /* 阴影调柔和一点 */
+            border-radius: 16px; /* 圆角稍微收一点，显得干练 */
+            
+            /* 布局设置 - 紧凑版 */
+            padding: 2px 12px; /* 减少内边距 */
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            flex-wrap: nowrap; /* 强制不换行，保持一排 */
+            gap: 8px;          /* 减少元素间距 */
+            max-width: 98vw;
+            
+            transition: all 0.3s ease;
+        "
+        onmouseover="this.style.background='rgba(255, 255, 255, 0.95)'; this.style.transform='translateX(-50%) translateY(2px)';"
+        onmouseout="this.style.background='rgba(255, 255, 255, 0.85)'; this.style.transform='translateX(-50%) translateY(0)';"
+        >
+           <!-- 1. 天气组件 (宽度收紧) -->
+           <div style="flex-shrink: 0;">
+               <iframe scrolling="no" src="https://i.tianqi.com/index.php?c=code&id=12&color=%23333&icon=1&num=1&site=12" frameborder="0" width="330" height="60" allowtransparency="true"></iframe>
+           </div>
+           
+           <!-- 分隔线 -->
+           <div class="divider" style="width: 1px; height: 36px; background: rgba(0,0,0,0.1); margin: 0 4px;"></div>
+
+           <!-- 2. 时间组件 (包含农历) -->
+           <div id="live-clock" style="
+               font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+               color: #333;
+               text-align: center;
+               min-width: 100px;
+               display: flex;
+               flex-direction: column;
+               justify-content: center;
+               line-height: 1.2;
+           ">
+               <!-- 时间行 (放大加粗) -->
+               <div id="time-text" style="font-size: 22px; font-weight: 700; color: #2c3e50; letter-spacing: 0.5px;">
+                   00:00
+               </div>
+               
+               <!-- 日期行 (公历+星期) -->
+               <div style="font-size: 11px; color: #555; margin-top: 1px;">
+                   <span id="date-text">loading...</span>
+               </div>
+
+               <!-- 农历行 (新增) -->
+               <div style="font-size: 10px; color: #888;">
+                   <span id="lunar-text">农历计算中...</span>
+               </div>
+           </div>
         </div>
+
+        <!-- 3. 时间脚本 -->
+        <script>
+            function updateClock() {
+                const now = new Date();
+                
+                // --- 1. 基础时间 ---
+                const hours = String(now.getHours()).padStart(2, '0');
+                const minutes = String(now.getMinutes()).padStart(2, '0');
+                // 秒数跳动太快容易分散注意力，紧凑模式下省略秒数，或者只显示闪烁的冒号，这里为了简洁只显示时分
+                document.getElementById('time-text').innerText = `${hours}:${minutes}`;
+
+                // --- 2. 公历日期 ---
+                const months = now.getMonth() + 1;
+                const days = now.getDate();
+                const weekArr = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
+                const week = weekArr[now.getDay()];
+                document.getElementById('date-text').innerText = `${months}月${days}日 ${week}`;
+
+                // --- 3. 农历日期 (使用 Intl API) ---
+                // 这是一个无需额外库的黑科技，利用浏览器内置的国际化API获取农历
+                try {
+                    const lunarDate = new Intl.DateTimeFormat('zh-CN-u-ca-chinese', {
+                        day: 'numeric',
+                        month: 'long'
+                    }).format(now);
+                    // 格式通常是 "十一月29日"，我们稍微美化一下
+                    let cleanLunar = lunarDate.replace('月', '月'); 
+                    document.getElementById('lunar-text').innerText = "农历 " + cleanLunar;
+                } catch (e) {
+                    document.getElementById('lunar-text').innerText = ""; // 不支持的旧浏览器则不显示
+                }
+            }
+            
+            updateClock();
+            setInterval(updateClock, 1000);
+            
+            // 手机端极简模式：屏幕太窄时，隐藏天气，只留时间（防止遮挡太严重）
+            if (window.innerWidth < 450) {
+                 // 只是建议，如果想强制显示也可以注释掉下面这行
+                 // document.querySelector('iframe').style.display = 'none';
+                 // document.querySelector('.divider').style.display = 'none';
+            }
+        </script>
 
         <!-- 底部版权文字 -->
         <div class="footer-text text-center">
