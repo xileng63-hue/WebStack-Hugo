@@ -10,7 +10,6 @@
 <!-- ======================================================= -->
 <!-- 旗舰版信息胶囊 (自动搬运到 Body) -->
 <!-- ======================================================= -->
-<!-- 注意：去掉了 display: none，改为 visibility: hidden，防止脚本失效时彻底消失 -->
 <div id="info-capsule-template" style="
     visibility: hidden; 
     opacity: 0;
@@ -29,10 +28,10 @@
     border-radius: 24px;
     
     /* --- 布局设置 --- */
-    padding: 8px 24px;
+    padding: 6px 20px;
     align-items: center; 
     justify-content: center;
-    gap: 20px;
+    gap: 15px;
     
     /* 字体设置 */
     font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
@@ -48,168 +47,70 @@
     transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
 ">
 
-   <!-- 左侧：时间与日期 -->
-   <div class="time-group" style="display: flex; flex-direction: column; align-items: center; text-align: center; min-width: 90px;">
-       <div id="time-text" style="font-size: 26px; font-weight: 600; line-height: 1; color: #1d1d1f; letter-spacing: 0.5px; font-variant-numeric: tabular-nums;">
+   <!-- 左侧：时间与日期 (保持精准代码控制) -->
+   <div class="time-group" style="display: flex; flex-direction: column; align-items: center; text-align: center; min-width: 80px;">
+       <div id="time-text" style="font-size: 24px; font-weight: 600; line-height: 1; color: #1d1d1f; letter-spacing: 0.5px; font-variant-numeric: tabular-nums;">
            00:00
        </div>
-       <div style="font-size: 11px; color: #666; margin-top: 5px; font-weight: 500;">
-           <span id="date-text">...</span> <span style="opacity: 0.4; margin: 0 3px;">|</span> <span id="lunar-text">...</span>
+       <div style="font-size: 10px; color: #666; margin-top: 4px; font-weight: 500;">
+           <span id="date-text">...</span> <span style="opacity: 0.4; margin: 0 2px;">|</span> <span id="lunar-text">...</span>
        </div>
    </div>
    
    <!-- 分隔线 -->
-   <div class="divider" style="width: 1px; height: 32px; background: rgba(0,0,0,0.15);"></div>
+   <div class="divider" style="width: 1px; height: 30px; background: rgba(0,0,0,0.15);"></div>
 
-   <!-- 右侧：智能天气轮播 -->
+   <!-- 右侧：中国天气网官方插件 -->
    <div id="weather-box" style="
        display: flex; 
        align-items: center; 
        justify-content: center;
-       min-width: 120px;
-       height: 46px;
+       height: 40px;
        opacity: 1;
-       transition: opacity 0.3s ease;
-       text-align: center;
    ">
-       <span style="font-size: 12px; color: #888;">正在定位...</span>
+       <!-- 
+            使用中国天气网 (i.tianqi.com) 官方 Iframe
+            id=10: 这是一个非常经典的横条滚动样式
+            color=%23333: 文字颜色设为深灰，匹配我们的胶囊
+            py=Tianjin: 默认显示，但它通常会自动根据IP跳转
+       -->
+       <iframe scrolling="no" src="https://i.tianqi.com/index.php?c=code&id=10&color=%23333&icon=1&site=12" frameborder="0" width="260" height="25" allowtransparency="true"></iframe>
    </div>
 
 </div>
 
-<!-- 智能脚本 -->
+<!-- 智能脚本 (负责搬运元素 + 更新时间) -->
 <script>
     (function() {
         // --- 初始化函数 ---
         function initCapsule() {
-            // 1. 检查是否已经存在（防止 PJAX 重复加载）
             if (document.getElementById('info-capsule-active')) return;
-
-            // 2. 获取模板
             var template = document.getElementById('info-capsule-template');
             if (!template) return;
 
-            // 3. 克隆并搬运到 Body
             var capsule = template.cloneNode(true);
-            capsule.id = 'info-capsule-active'; // 激活的新ID
-            capsule.style.display = 'flex'; // 确保布局为 flex
+            capsule.id = 'info-capsule-active';
+            capsule.style.display = 'flex';
             document.body.appendChild(capsule);
 
-            // 4. 显形动画 (稍微延迟一点点，确保搬运完成)
             setTimeout(function() {
                 capsule.style.visibility = 'visible';
                 capsule.style.opacity = '1';
-                capsule.style.top = '20px'; // 确保位置正确
+                capsule.style.top = '20px';
             }, 100);
 
-            // 5. 启动逻辑
             startLogic(capsule);
-            
-            // 6. 清理模板（可选，保持 DOM 干净）
             template.remove();
         }
 
         // --- 业务逻辑 ---
         function startLogic(container) {
-            const CAROUSEL_INTERVAL = 8000; 
-            let weatherData = null;
-            let currentSlideIndex = 0; 
-            let weatherInterval = null;
-
-            // 获取元素引用（在新的容器内查找）
+            // 获取元素引用
             const timeText = container.querySelector('#time-text');
             const dateText = container.querySelector('#date-text');
             const lunarText = container.querySelector('#lunar-text');
-            const weatherBox = container.querySelector('#weather-box');
 
-            function getWeatherIcon(code) {
-                if (code === 0) return '☀️';
-                if (code >= 1 && code <= 3) return '⛅';
-                if (code >= 45 && code <= 48) return '🌫️';
-                if (code >= 51 && code <= 67) return '🌧️';
-                if (code >= 71 && code <= 77) return '❄️';
-                if (code >= 80 && code <= 82) return '🌦️';
-                if (code >= 95 && code <= 99) return '⛈️';
-                return '🌡️';
-            }
-
-            async function initWeather() {
-                let latitude = 39.9042;
-                let longitude = 116.4074;
-                let city = "本地";
-
-                try {
-                    const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 3000);
-                    const geoRes = await fetch('https://get.geojs.io/v1/ip/geo.json', { signal: controller.signal });
-                    const geoData = await geoRes.json();
-                    
-                    if (geoData.latitude && geoData.longitude) {
-                        latitude = geoData.latitude;
-                        longitude = geoData.longitude;
-                        city = geoData.city || geoData.region || "本地";
-                    }
-                    clearTimeout(timeoutId);
-                } catch (e) { console.warn("定位超时"); }
-
-                try {
-                    const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=3`);
-                    const wData = await weatherRes.json();
-                    weatherData = { city: city, current: wData.current_weather, daily: wData.daily };
-                    
-                    renderWeather();
-                    if (weatherInterval) clearInterval(weatherInterval);
-                    weatherInterval = setInterval(renderWeather, CAROUSEL_INTERVAL);
-                } catch (e) {
-                    if(weatherBox) weatherBox.innerHTML = '<span style="font-size:12px;color:#999;">天气服务维护中</span>';
-                }
-            }
-
-            function renderWeather() {
-                if (!weatherData || !weatherData.daily) return;
-                
-                weatherBox.style.opacity = '0';
-                
-                setTimeout(() => {
-                    let htmlContent = '';
-                    if (currentSlideIndex === 0) {
-                        const temp = Math.round(weatherData.current.temperature);
-                        const icon = getWeatherIcon(weatherData.current.weathercode);
-                        htmlContent = `
-                            <div style="display:flex; flex-direction:column; align-items:center;">
-                                <div style="font-size: 16px; font-weight: 600; color: #333; margin-bottom: 3px;">
-                                    ${icon} ${temp}°C
-                                </div>
-                                <div style="font-size: 11px; color: #666;">
-                                    📍 ${weatherData.city} · 实时
-                                </div>
-                            </div>`;
-                        currentSlideIndex = 1; 
-                    } else {
-                        const dayIndex = currentSlideIndex;
-                        if (weatherData.daily.time[dayIndex]) {
-                            const max = Math.round(weatherData.daily.temperature_2m_max[dayIndex]);
-                            const min = Math.round(weatherData.daily.temperature_2m_min[dayIndex]);
-                            const icon = getWeatherIcon(weatherData.daily.weathercode[dayIndex]);
-                            const dayName = (dayIndex === 1) ? "明天" : "后天";
-                            htmlContent = `
-                                <div style="display:flex; flex-direction:column; align-items:center;">
-                                    <div style="font-size: 15px; font-weight: 600; color: #555; margin-bottom: 3px;">
-                                        ${dayName} ${icon}
-                                    </div>
-                                    <div style="font-size: 11px; color: #666;">
-                                        ${min}° ~ ${max}°
-                                    </div>
-                                </div>`;
-                        }
-                        currentSlideIndex++;
-                        if (currentSlideIndex > 2) currentSlideIndex = 0; 
-                    }
-                    weatherBox.innerHTML = htmlContent;
-                    weatherBox.style.opacity = '1'; 
-                }, 300);
-            }
-
+            // 只需要负责更新时间，天气由 Iframe 自己搞定
             function updateClock() {
                 const now = new Date();
                 const hours = String(now.getHours()).padStart(2, '0');
@@ -229,7 +130,6 @@
                 } catch (e) {}
             }
 
-            initWeather();
             updateClock();
             setInterval(updateClock, 1000);
             
