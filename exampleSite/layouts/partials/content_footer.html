@@ -1,17 +1,16 @@
-<!-- 这里是页脚区域 -->
 <footer class="main-footer footer-type-1 text-xs">
     <div id="footer-tools" class="d-flex flex-column">
         
-        <!-- 天气组件：改为悬浮在【右下角】 -->
-        <!-- bottom: 80px 是为了避开可能存在的“回到顶部”按钮 -->
-        <!-- right: 20px 是距离右边的距离 -->
-        <div style="position: fixed; bottom: 80px; right: 20px; z-index: 99999; background: rgba(255,255,255,0.9); border-radius: 8px; padding: 5px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
-           <iframe scrolling="no" src="https://tianqiapi.com/api.php?style=tp&skin=pitaya" frameborder="0" width="160" height="24" allowtransparency="true"></iframe>
+        <!-- 天气组件：左下角胶囊悬浮 -->
+        <!-- 更换为【中国天气网】官方稳定源 -->
+        <div style="position: fixed; bottom: 20px; left: 20px; z-index: 99999; background: #fff; border-radius: 20px; padding: 0px 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); height: 30px; display: flex; align-items: center; overflow: hidden;">
+           <!-- id=10 是极简模式，icon=1 显示图标 -->
+           <iframe scrolling="no" src="https://i.tianqi.com/index.php?c=code&id=10&color=%23333&icon=1" frameborder="0" width="220" height="25" allowtransparency="true"></iframe>
         </div>
 
-        <!-- 这里的文字显示在页面最底部 -->
+        <!-- 底部版权文字 -->
         <div class="footer-text text-center">
-            <p style="margin: 0;">&copy; 2025 <strong>我的专属导航站</strong> | 遇见更好的世界</p>
+            <p style="margin: 0;">&copy; 2025 <strong>我的专属导航站</strong></p>
         </div>
         
     </div>
