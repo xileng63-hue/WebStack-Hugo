@@ -1,0 +1,18 @@
+<!-- 这里是页脚区域 -->
+<footer class="main-footer footer-type-1 text-xs">
+    <div id="footer-tools" class="d-flex flex-column">
+        
+        <!-- 天气组件：改为悬浮在【右下角】 -->
+        <!-- bottom: 80px 是为了避开可能存在的“回到顶部”按钮 -->
+        <!-- right: 20px 是距离右边的距离 -->
+        <div style="position: fixed; bottom: 80px; right: 20px; z-index: 99999; background: rgba(255,255,255,0.9); border-radius: 8px; padding: 5px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+           <iframe scrolling="no" src="https://tianqiapi.com/api.php?style=tp&skin=pitaya" frameborder="0" width="160" height="24" allowtransparency="true"></iframe>
+        </div>
+
+        <!-- 这里的文字显示在页面最底部 -->
+        <div class="footer-text text-center">
+            <p style="margin: 0;">&copy; 2025 <strong>我的专属导航站</strong> | 遇见更好的世界</p>
+        </div>
+        
+    </div>
+</footer>
