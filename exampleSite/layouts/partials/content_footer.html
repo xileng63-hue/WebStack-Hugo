@@ -1,247 +1,253 @@
 <footer class="main-footer footer-type-1 text-xs">
+    <!-- 这里的 div 只是占位，内容会被下面的 JS 搬运到 body 上 -->
     <div id="footer-tools" class="d-flex flex-column">
-        
-        <!-- ======================================================= -->
-        <!-- 旗舰版信息胶囊：居中对齐 + 稳健定位 -->
-        <!-- ======================================================= -->
-        <div id="info-capsule" style="
-            position: fixed; 
-            top: 20px; 
-            left: 50%; 
-            transform: translateX(-50%); 
-            z-index: 99999;
-            
-            /* --- 旗舰级磨砂玻璃特效 --- */
-            background: rgba(255, 255, 255, 0.8); /* 不透明度微调，更清晰 */
-            backdrop-filter: blur(20px) saturate(180%);
-            -webkit-backdrop-filter: blur(20px) saturate(180%);
-            border: 1px solid rgba(255, 255, 255, 0.6);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
-            border-radius: 24px;
-            
-            /* --- 布局设置 --- */
-            padding: 8px 30px; /* 增加左右内边距 */
-            display: flex; 
-            align-items: center; 
-            justify-content: center;
-            gap: 25px; /* 增加间距，让左右更平衡 */
-            
-            /* 字体设置 */
-            font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
-            color: #333;
-            white-space: nowrap;
-            
-            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-        "
-        onmouseover="this.style.background='rgba(255, 255, 255, 0.95)'; this.style.transform='translateX(-50%) scale(1.02)';"
-        onmouseout="this.style.background='rgba(255, 255, 255, 0.8)'; this.style.transform='translateX(-50%) scale(1)';"
-        >
-
-           <!-- 左侧：时间与日期 (居中对齐) -->
-           <div class="time-group" style="display: flex; flex-direction: column; align-items: center; text-align: center; min-width: 90px;">
-               <!-- 大号时间 -->
-               <div id="time-text" style="font-size: 26px; font-weight: 600; line-height: 1; color: #1d1d1f; letter-spacing: 0.5px;">
-                   00:00
-               </div>
-               <!-- 日期与农历 -->
-               <div style="font-size: 11px; color: #666; margin-top: 5px; font-weight: 500;">
-                   <span id="date-text">...</span> <span style="opacity: 0.4;">|</span> <span id="lunar-text">...</span>
-               </div>
-           </div>
-           
-           <!-- 分隔线 -->
-           <div class="divider" style="width: 1px; height: 36px; background: rgba(0,0,0,0.1);"></div>
-
-           <!-- 右侧：智能天气轮播 (居中对齐) -->
-           <div id="weather-box" style="
-               display: flex; 
-               align-items: center; 
-               justify-content: center; /* 改为居中 */
-               min-width: 120px;
-               height: 46px;
-               opacity: 1;
-               transition: opacity 0.3s ease;
-               text-align: center; /* 文字居中 */
-           ">
-               <span style="font-size: 12px; color: #888;">正在定位...</span>
-           </div>
-
-        </div>
-
-        <!-- 3. 智能脚本 -->
-        <script>
-            // --- 配置 ---
-            const CAROUSEL_INTERVAL = 8000; 
-            
-            // --- 状态变量 ---
-            let weatherData = null;
-            let currentSlideIndex = 0; 
-            let weatherInterval = null;
-
-            // --- 天气代码转 Emoji ---
-            function getWeatherIcon(code) {
-                if (code === 0) return '☀️';
-                if (code >= 1 && code <= 3) return '⛅';
-                if (code >= 45 && code <= 48) return '🌫️';
-                if (code >= 51 && code <= 67) return '🌧️';
-                if (code >= 71 && code <= 77) return '❄️';
-                if (code >= 80 && code <= 82) return '🌦️';
-                if (code >= 95 && code <= 99) return '⛈️';
-                return '🌡️';
-            }
-
-            // --- 获取位置并加载天气 (带兜底逻辑) ---
-            async function initWeather() {
-                let latitude = 39.9042; // 默认北京
-                let longitude = 116.4074;
-                let city = "本地";
-
-                try {
-                    // 尝试获取精准定位
-                    // 使用 fetch 的 signal 增加超时控制，防止一直卡在"正在定位"
-                    const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 3000); // 3秒超时
-
-                    const geoRes = await fetch('https://get.geojs.io/v1/ip/geo.json', { signal: controller.signal });
-                    const geoData = await geoRes.json();
-                    
-                    if (geoData.latitude && geoData.longitude) {
-                        latitude = geoData.latitude;
-                        longitude = geoData.longitude;
-                        city = geoData.city || geoData.region || "本地";
-                    }
-                    clearTimeout(timeoutId);
-
-                } catch (e) {
-                    console.warn("定位超时或失败，使用默认坐标:", e);
-                    // 失败时不中断，继续用默认坐标请求天气，保证组件有内容显示
-                }
-
-                try {
-                    // 请求天气数据
-                    const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=3`);
-                    const wData = await weatherRes.json();
-
-                    weatherData = {
-                        city: city,
-                        current: wData.current_weather,
-                        daily: wData.daily
-                    };
-
-                    // 启动渲染
-                    renderWeather();
-                    // 清除旧定时器（防止重复）并启动新定时器
-                    if (weatherInterval) clearInterval(weatherInterval);
-                    weatherInterval = setInterval(renderWeather, CAROUSEL_INTERVAL);
-
-                } catch (e) {
-                    console.error("Weather API Error:", e);
-                    document.getElementById('weather-box').innerHTML = '<span style="font-size:12px;color:#999;">天气服务维护中</span>';
-                }
-            }
-
-            // --- 渲染天气逻辑 ---
-            function renderWeather() {
-                if (!weatherData || !weatherData.daily) return;
-
-                const box = document.getElementById('weather-box');
-                
-                // 淡出
-                box.style.opacity = '0';
-                
-                setTimeout(() => {
-                    let htmlContent = '';
-                    
-                    // 0:实时 -> 1:明天 -> 2:后天 -> 0
-                    if (currentSlideIndex === 0) {
-                        // === 实时天气 ===
-                        const temp = Math.round(weatherData.current.temperature);
-                        const icon = getWeatherIcon(weatherData.current.weathercode);
-                        const displayCity = weatherData.city; 
-                        
-                        htmlContent = `
-                            <div style="display:flex; flex-direction:column; align-items:center;">
-                                <div style="font-size: 16px; font-weight: 600; color: #333; margin-bottom: 3px;">
-                                    ${icon} ${temp}°C
-                                </div>
-                                <div style="font-size: 11px; color: #666;">
-                                    📍 ${displayCity} · 实时
-                                </div>
-                            </div>
-                        `;
-                        currentSlideIndex = 1; 
-                    } else {
-                        // === 未来预报 ===
-                        const dayIndex = currentSlideIndex;
-                        if (weatherData.daily.time[dayIndex]) {
-                            const max = Math.round(weatherData.daily.temperature_2m_max[dayIndex]);
-                            const min = Math.round(weatherData.daily.temperature_2m_min[dayIndex]);
-                            const icon = getWeatherIcon(weatherData.daily.weathercode[dayIndex]);
-                            const dayName = (dayIndex === 1) ? "明天" : "后天";
-
-                            htmlContent = `
-                                <div style="display:flex; flex-direction:column; align-items:center;">
-                                    <div style="font-size: 15px; font-weight: 600; color: #555; margin-bottom: 3px;">
-                                        ${dayName} ${icon}
-                                    </div>
-                                    <div style="font-size: 11px; color: #666;">
-                                        ${min}° ~ ${max}°
-                                    </div>
-                                </div>
-                            `;
-                        }
-                        currentSlideIndex++;
-                        if (currentSlideIndex > 2) currentSlideIndex = 0; 
-                    }
-
-                    box.innerHTML = htmlContent;
-                    box.style.opacity = '1'; // 淡入
-                }, 300);
-            }
-
-            // --- 时钟与农历 ---
-            function updateClock() {
-                const now = new Date();
-                
-                const hours = String(now.getHours()).padStart(2, '0');
-                const minutes = String(now.getMinutes()).padStart(2, '0');
-                document.getElementById('time-text').innerText = `${hours}:${minutes}`;
-
-                const months = now.getMonth() + 1;
-                const days = now.getDate();
-                const weekArr = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
-                const week = weekArr[now.getDay()];
-                document.getElementById('date-text').innerText = `${months}月${days}日 ${week}`;
-
-                try {
-                    const lunarDate = new Intl.DateTimeFormat('zh-CN-u-ca-chinese', {
-                        day: 'numeric',
-                        month: 'numeric'
-                    }).format(now);
-                    const cleanLunar = lunarDate.split(' ').pop().replace('月', '/');
-                    document.getElementById('lunar-text').innerText = `农历${cleanLunar}`;
-                } catch (e) {
-                    document.getElementById('lunar-text').innerText = "";
-                }
-            }
-            
-            // --- 启动 ---
-            initWeather();
-            updateClock();
-            setInterval(updateClock, 1000);
-
-            // 手机适配
-            if (window.innerWidth < 400) {
-                 document.getElementById('info-capsule').style.padding = "6px 16px";
-                 document.getElementById('info-capsule').style.gap = "15px";
-                 document.getElementById('time-text').style.fontSize = "22px";
-            }
-        </script>
-
-        <!-- 底部版权文字 -->
         <div class="footer-text text-center">
             <p style="margin: 0;">&copy; 2025 <strong>我的专属导航站</strong></p>
         </div>
-        
     </div>
 </footer>
+
+<!-- ======================================================= -->
+<!-- 旗舰版信息胶囊 (将通过 JS 移动到 Body 根节点) -->
+<!-- ======================================================= -->
+<div id="info-capsule" style="
+    display: none; /* 初始隐藏，防止闪烁，JS搬运后会显示 */
+    position: fixed; 
+    top: 20px; 
+    left: 50%; 
+    transform: translateX(-50%); 
+    z-index: 2147483647; /* 这是一个极大的值，确保在所有图层之上 */
+    
+    /* --- 旗舰级磨砂玻璃特效 --- */
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+    border-radius: 24px;
+    
+    /* --- 布局设置 --- */
+    padding: 8px 24px;
+    align-items: center; 
+    justify-content: center;
+    gap: 20px;
+    
+    /* 字体设置 */
+    font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    color: #333;
+    white-space: nowrap;
+    
+    /* 确保不受父级样式影响的重置属性 */
+    box-sizing: border-box;
+    line-height: normal;
+    text-align: left;
+    pointer-events: auto;
+    
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+">
+
+   <!-- 左侧：时间与日期 -->
+   <div class="time-group" style="display: flex; flex-direction: column; align-items: center; text-align: center; min-width: 90px;">
+       <!-- 大号时间 -->
+       <div id="time-text" style="font-size: 26px; font-weight: 600; line-height: 1; color: #1d1d1f; letter-spacing: 0.5px; font-variant-numeric: tabular-nums;">
+           00:00
+       </div>
+       <!-- 日期与农历 -->
+       <div style="font-size: 11px; color: #666; margin-top: 5px; font-weight: 500;">
+           <span id="date-text">...</span> <span style="opacity: 0.4; margin: 0 3px;">|</span> <span id="lunar-text">...</span>
+       </div>
+   </div>
+   
+   <!-- 分隔线 -->
+   <div class="divider" style="width: 1px; height: 32px; background: rgba(0,0,0,0.15);"></div>
+
+   <!-- 右侧：智能天气轮播 -->
+   <div id="weather-box" style="
+       display: flex; 
+       align-items: center; 
+       justify-content: center;
+       min-width: 120px;
+       height: 46px;
+       opacity: 1;
+       transition: opacity 0.3s ease;
+       text-align: center;
+   ">
+       <span style="font-size: 12px; color: #888;">正在定位...</span>
+   </div>
+
+</div>
+
+<!-- 智能脚本 -->
+<script>
+    (function() {
+        // --- 核心修复：金蝉脱壳法 ---
+        // 将组件移动到 body 下，打破所有父级容器的限制（overflow:hidden, z-index, transform 等）
+        var capsule = document.getElementById('info-capsule');
+        if (capsule && document.body) {
+            document.body.appendChild(capsule);
+            capsule.style.display = 'flex'; // 搬运到位后，显示出来
+        }
+
+        // --- 配置 ---
+        const CAROUSEL_INTERVAL = 8000; 
+        
+        // --- 状态变量 ---
+        let weatherData = null;
+        let currentSlideIndex = 0; 
+        let weatherInterval = null;
+
+        // --- 天气代码转 Emoji ---
+        function getWeatherIcon(code) {
+            if (code === 0) return '☀️';
+            if (code >= 1 && code <= 3) return '⛅';
+            if (code >= 45 && code <= 48) return '🌫️';
+            if (code >= 51 && code <= 67) return '🌧️';
+            if (code >= 71 && code <= 77) return '❄️';
+            if (code >= 80 && code <= 82) return '🌦️';
+            if (code >= 95 && code <= 99) return '⛈️';
+            return '🌡️';
+        }
+
+        // --- 获取位置并加载天气 ---
+        async function initWeather() {
+            let latitude = 39.9042; // 默认北京
+            let longitude = 116.4074;
+            let city = "本地";
+
+            try {
+                // 3秒定位超时控制
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 3000);
+
+                const geoRes = await fetch('https://get.geojs.io/v1/ip/geo.json', { signal: controller.signal });
+                const geoData = await geoRes.json();
+                
+                if (geoData.latitude && geoData.longitude) {
+                    latitude = geoData.latitude;
+                    longitude = geoData.longitude;
+                    city = geoData.city || geoData.region || "本地";
+                }
+                clearTimeout(timeoutId);
+            } catch (e) {
+                console.warn("定位超时，使用默认坐标");
+            }
+
+            try {
+                const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=3`);
+                const wData = await weatherRes.json();
+
+                weatherData = {
+                    city: city,
+                    current: wData.current_weather,
+                    daily: wData.daily
+                };
+
+                renderWeather();
+                if (weatherInterval) clearInterval(weatherInterval);
+                weatherInterval = setInterval(renderWeather, CAROUSEL_INTERVAL);
+            } catch (e) {
+                console.error("Weather API Error:", e);
+                document.getElementById('weather-box').innerHTML = '<span style="font-size:12px;color:#999;">天气服务维护中</span>';
+            }
+        }
+
+        // --- 渲染天气 ---
+        function renderWeather() {
+            if (!weatherData || !weatherData.daily) return;
+
+            const box = document.getElementById('weather-box');
+            box.style.opacity = '0';
+            
+            setTimeout(() => {
+                let htmlContent = '';
+                
+                if (currentSlideIndex === 0) {
+                    // 实时
+                    const temp = Math.round(weatherData.current.temperature);
+                    const icon = getWeatherIcon(weatherData.current.weathercode);
+                    const displayCity = weatherData.city; 
+                    
+                    htmlContent = `
+                        <div style="display:flex; flex-direction:column; align-items:center;">
+                            <div style="font-size: 16px; font-weight: 600; color: #333; margin-bottom: 3px;">
+                                ${icon} ${temp}°C
+                            </div>
+                            <div style="font-size: 11px; color: #666;">
+                                📍 ${displayCity} · 实时
+                            </div>
+                        </div>
+                    `;
+                    currentSlideIndex = 1; 
+                } else {
+                    // 预报
+                    const dayIndex = currentSlideIndex;
+                    if (weatherData.daily.time[dayIndex]) {
+                        const max = Math.round(weatherData.daily.temperature_2m_max[dayIndex]);
+                        const min = Math.round(weatherData.daily.temperature_2m_min[dayIndex]);
+                        const icon = getWeatherIcon(weatherData.daily.weathercode[dayIndex]);
+                        const dayName = (dayIndex === 1) ? "明天" : "后天";
+
+                        htmlContent = `
+                            <div style="display:flex; flex-direction:column; align-items:center;">
+                                <div style="font-size: 15px; font-weight: 600; color: #555; margin-bottom: 3px;">
+                                    ${dayName} ${icon}
+                                </div>
+                                <div style="font-size: 11px; color: #666;">
+                                    ${min}° ~ ${max}°
+                                </div>
+                            </div>
+                        `;
+                    }
+                    currentSlideIndex++;
+                    if (currentSlideIndex > 2) currentSlideIndex = 0; 
+                }
+
+                box.innerHTML = htmlContent;
+                box.style.opacity = '1'; 
+            }, 300);
+        }
+
+        // --- 时钟与农历 ---
+        function updateClock() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const timeEl = document.getElementById('time-text');
+            if(timeEl) timeEl.innerText = `${hours}:${minutes}`;
+
+            const months = now.getMonth() + 1;
+            const days = now.getDate();
+            const weekArr = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
+            const week = weekArr[now.getDay()];
+            const dateEl = document.getElementById('date-text');
+            if(dateEl) dateEl.innerText = `${months}月${days}日 ${week}`;
+
+            try {
+                const lunarDate = new Intl.DateTimeFormat('zh-CN-u-ca-chinese', {
+                    day: 'numeric',
+                    month: 'numeric'
+                }).format(now);
+                const cleanLunar = lunarDate.split(' ').pop().replace('月', '/');
+                const lunarEl = document.getElementById('lunar-text');
+                if(lunarEl) lunarEl.innerText = `农历${cleanLunar}`;
+            } catch (e) {}
+        }
+        
+        initWeather();
+        updateClock();
+        setInterval(updateClock, 1000);
+
+        // --- 交互特效 ---
+        const cap = document.getElementById('info-capsule');
+        if(cap) {
+            cap.addEventListener('mouseenter', function() {
+                this.style.background = 'rgba(255, 255, 255, 0.95)';
+                this.style.transform = 'translateX(-50%) scale(1.02)';
+            });
+            cap.addEventListener('mouseleave', function() {
+                this.style.background = 'rgba(255, 255, 255, 0.85)';
+                this.style.transform = 'translateX(-50%) scale(1)';
+            });
+        }
+    })();
+</script>
