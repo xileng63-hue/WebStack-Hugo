@@ -103,3 +103,81 @@
         </div>
         <div class="placeholder" style="height:74px"></div>
     </div>
+	
+<!-- ======================================================= -->
+<!-- 2. 天气组件 (纯 HTML 结构，不依赖 JS 生成) -->
+<!-- ======================================================= -->
+<!-- 使用 !important 强制层级和显示 -->
+<div id="fixed-weather-capsule" style="
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: fixed !important; 
+    top: 15px !important; 
+    left: 50% !important; 
+    transform: translateX(-50%) !important; 
+    z-index: 2147483647 !important; 
+    
+    background: rgba(255, 255, 255, 0.95); 
+    border: 1px solid #ddd;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15); 
+    border-radius: 50px;
+    padding: 6px 20px; 
+    align-items: center; 
+    gap: 15px;
+    height: 40px;
+    
+    font-family: sans-serif;
+    color: #333;
+    pointer-events: auto;
+">
+    <!-- 左侧：时间 (默认显示 Loading，防止 JS 挂了之后空白) -->
+    <div style="text-align: center; line-height: 1.1; min-width: 70px;">
+        <div id="inject-time" style="font-size: 20px; font-weight: 700; color: #1d1d1f;">--:--</div>
+        <div id="inject-date" style="font-size: 10px; color: #666; margin-top: 2px;">日期加载中</div>
+    </div>
+    
+    <!-- 分隔线 -->
+    <div style="width: 1px; height: 25px; background: #ccc;"></div>
+
+    <!-- 右侧：中国天气网 -->
+    <div style="display: flex; align-items: center; justify-content: center;">
+        <iframe scrolling="no" src="https://i.tianqi.com/index.php?c=code&id=10&color=%23333&icon=1&site=12" frameborder="0" width="240" height="25" allowtransparency="true"></iframe>
+    </div>
+</div>
+
+<!-- ======================================================= -->
+<!-- 3. 简单的时钟脚本 -->
+<!-- ======================================================= -->
+<script>
+    (function() {
+        // 为了防止组件被父级容器遮挡，尝试将其移到 body 下
+        // 即使这一步失败，上面的 HTML 也会显示，只是位置可能受限
+        try {
+            var capsule = document.getElementById('fixed-weather-capsule');
+            if (capsule && document.body && capsule.parentNode !== document.body) {
+                document.body.appendChild(capsule);
+            }
+        } catch(e) { console.log('搬运失败，保持原位'); }
+
+        // 启动时钟
+        var timeEl = document.getElementById('inject-time');
+        var dateEl = document.getElementById('inject-date');
+        
+        function update() {
+            var now = new Date();
+            var h = now.getHours().toString().padStart(2, '0');
+            var m = now.getMinutes().toString().padStart(2, '0');
+            if(timeEl) timeEl.innerText = h + ':' + m;
+            
+            var month = now.getMonth() + 1;
+            var day = now.getDate();
+            var weeks = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
+            var w = weeks[now.getDay()];
+            if(dateEl) dateEl.innerText = month + '月' + day + '日 ' + w;
+        }
+        
+        setInterval(update, 1000);
+        update(); // 立即执行一次
+    })();
+</script>
