@@ -1,322 +1,151 @@
 <!-- ======================================================= -->
-<!-- 第一部分：原版功能区 (保留所有按钮) -->
+<!-- 1. 原生页脚区 (保留按钮) -->
 <!-- ======================================================= -->
 <footer class="main-footer footer-type-1 text-xs">
     <div id="footer-tools" class="d-flex flex-column">
-        <!-- 1. 回到顶部 -->
-        <a href="javascript:" id="go-to-up" class="btn rounded-circle go-up m-1" rel="go-top">
-            <i class="iconfont icon-to-up"></i>
-        </a>
-        
-        <!-- 2. 搜索 -->
-        <a href="javascript:" data-toggle="modal" data-target="#search-modal" class="btn rounded-circle m-1" rel="search" one-link-mark="yes">
-            <i class="iconfont icon-search"></i>
-        </a>
-        
-        <!-- 3. 客服 -->
-        <a href="https://github.com/shenweiyan/WebStack-Hugo" class="btn rounded-circle kefu m-1" target="_blank" data-toggle="tooltip" data-placement="left" title="联系我们">
-            <i class="mode-ico iconfont icon-qq"></i>
-        </a>
-        
-        <!-- 4. 夜间模式切换 (部署后显示) -->
+        <a href="javascript:" id="go-to-up" class="btn rounded-circle go-up m-1" rel="go-top"><i class="iconfont icon-to-up"></i></a>
+        <a href="javascript:" data-toggle="modal" data-target="#search-modal" class="btn rounded-circle m-1" rel="search"><i class="iconfont icon-search"></i></a>
+        <a href="https://github.com/shenweiyan/WebStack-Hugo" class="btn rounded-circle kefu m-1" target="_blank"><i class="mode-ico iconfont icon-qq"></i></a>
         {{ if $.Site.Params.nightMode }}
-        <a href="javascript:" onclick="window.location.href='javascript:switchNightMode()'" class="btn rounded-circle switch-dark-mode m-1" id="yejian"
-            data-toggle="tooltip" data-placement="left" title="夜间模式">
-            <i class="mode-ico iconfont icon-light"></i>
-        </a>
+        <a href="javascript:" onclick="window.location.href='javascript:switchNightMode()'" class="btn rounded-circle switch-dark-mode m-1" id="yejian" title="夜间模式"><i class="mode-ico iconfont icon-light"></i></a>
         {{ else }}
-        <a href="javascript:" onclick="window.location.href='javascript:switchNightMode()'" class="btn rounded-circle switch-dark-mode m-1" id="yejian"
-            data-toggle="tooltip" data-placement="left" title="日间模式">
-            <i class="mode-ico iconfont icon-night"></i>
-        </a>
+        <a href="javascript:" onclick="window.location.href='javascript:switchNightMode()'" class="btn rounded-circle switch-dark-mode m-1" id="yejian" title="日间模式"><i class="mode-ico iconfont icon-night"></i></a>
         {{ end }}
     </div>
-
-    <!-- 5. 版权 -->
     <div class="footer-inner">
-        <div class="footer-text">
-            &copy; 2025 <strong>我的专属导航站</strong> | 
-            <a href="https://github.com/WebStackPage/WebStack-Hugo" target="_blank">WebStack-Hugo</a>
-        </div>
+        <div class="footer-text">&copy; 2025 <strong>我的专属导航站</strong></div>
     </div>
 </footer>
 
 <!-- ======================================================= -->
-<!-- 第二部分：全能悬浮模板 (将被脚本克隆到 Body) -->
-<!-- ======================================================= -->
-<div id="floating-template" style="display: none;">
-    
-    <!-- A. 旗舰版天气胶囊 (顶部) -->
-    <div id="info-capsule-body" style="
-        position: fixed; 
-        top: 20px; 
-        left: 50%; 
-        transform: translateX(-50%); 
-        z-index: 2147483647;
-        
-        /* 磨砂玻璃 */
-        background: rgba(255, 255, 255, 0.85);
-        backdrop-filter: blur(20px) saturate(180%);
-        -webkit-backdrop-filter: blur(20px) saturate(180%);
-        border: 1px solid rgba(255, 255, 255, 0.6);
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
-        border-radius: 24px;
-        
-        /* 布局 */
-        padding: 6px 20px;
-        display: flex;
-        align-items: center; 
-        justify-content: center;
-        gap: 15px;
-        font-family: -apple-system, sans-serif;
-        color: #333;
-        white-space: nowrap;
-        pointer-events: auto;
-        visibility: hidden; /* 初始隐藏，脚本控制显示 */
-        opacity: 0;
-        transition: all 0.5s ease;
-    ">
-       <!-- 时间 -->
-       <div class="time-group" style="display: flex; flex-direction: column; align-items: center; text-align: center; min-width: 80px;">
-           <div id="time-text" style="font-size: 24px; font-weight: 600; line-height: 1; color: #1d1d1f; letter-spacing: 0.5px; font-variant-numeric: tabular-nums;">00:00</div>
-           <div style="font-size: 10px; color: #666; margin-top: 4px; font-weight: 500;">
-               <span id="date-text">...</span> <span style="opacity: 0.4; margin: 0 2px;">|</span> <span id="lunar-text">...</span>
-           </div>
-       </div>
-       <div style="width: 1px; height: 30px; background: rgba(0,0,0,0.15);"></div>
-       <!-- 天气 Iframe -->
-       <div style="display: flex; align-items: center; justify-content: center; height: 40px;">
-           <iframe scrolling="no" src="https://i.tianqi.com/index.php?c=code&id=10&color=%23333&icon=1&site=12" frameborder="0" width="260" height="25" allowtransparency="true"></iframe>
-       </div>
-    </div>
-
-    <!-- B. Gemini AI 触发球 (右下角) -->
-    <div id="gemini-trigger" onclick="toggleGeminiChat()" style="
-        position: fixed; 
-        bottom: 100px; 
-        right: 20px; 
-        z-index: 2147483647; 
-        width: 48px; 
-        height: 48px; 
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
-        border-radius: 50%; 
-        box-shadow: 0 4px 15px rgba(118, 75, 162, 0.4); 
-        cursor: pointer; 
-        display: flex; 
-        align-items: center; 
-        justify-content: center; 
-        transition: transform 0.3s ease;
-        visibility: hidden;
-        opacity: 0;
-    ">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z" fill="white"/></svg>
-    </div>
-
-    <!-- C. 聊天窗口 -->
-    <div id="gemini-chat-window" style="
-        display: none; 
-        position: fixed; bottom: 160px; right: 20px; 
-        width: 340px; height: 480px; 
-        background: rgba(255, 255, 255, 0.9);
-        backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 255, 255, 0.8);
-        border-radius: 18px; 
-        box-shadow: 0 10px 40px rgba(0,0,0,0.15); 
-        z-index: 2147483647; 
-        flex-direction: column; 
-        overflow: hidden;
-        font-family: -apple-system, sans-serif;
-    ">
-        <div style="background: rgba(248, 249, 250, 0.8); padding: 15px; display: flex; justify-content: space-between; align-items: center;">
-            <span style="font-weight: 600; color: #333;">✨ Gemini AI</span>
-            <span onclick="toggleGeminiChat()" style="cursor: pointer; color: #999; font-size: 20px;">&times;</span>
-        </div>
-        <div id="chat-messages" style="flex: 1; padding: 15px; overflow-y: auto; font-size: 13px; line-height: 1.6;">
-            <div style="margin-bottom: 12px; color: #666; background: rgba(0,0,0,0.03); padding: 10px; border-radius: 8px;">👋 有什么我可以帮你的吗？</div>
-        </div>
-        <div style="padding: 12px; border-top: 1px solid rgba(0,0,0,0.05); display: flex; gap: 8px;">
-            <input type="text" id="user-input" placeholder="输入问题..." style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 20px;" onkeypress="handleKeyPress(event)">
-            <button onclick="sendMessage()" style="background: #764ba2; color: white; border: none; width: 36px; height: 36px; border-radius: 50%; cursor: pointer;">➤</button>
-        </div>
-    </div>
-</div>
-
-<!-- ======================================================= -->
-<!-- 智能脚本 (负责克隆与逻辑) -->
+<!-- 2. 暴力注入脚本 (直接把组件写进 Body) -->
 <!-- ======================================================= -->
 <script>
     (function() {
-        // ⚠️ 请在这里填入你的 API Key ⚠️
+        // ⚠️ API Key 填这里
         const GEMINI_API_KEY = 'AIzaSyCJogRHhJ8ib96V01JpZW-upOnhdrv3NAU'; 
 
-        // 主初始化函数
-        function initApp() {
-            // 1. 防止重复初始化
-            if (document.getElementById('floating-components-active')) return;
+        // 核心：HTML 字符串 (天气 + AI)
+        const FLOAT_HTML = `
+            <!-- A. 天气胶囊 -->
+            <div id="info-capsule-body" style="
+                position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 2147483647;
+                background: rgba(255, 255, 255, 0.9); border: 1px solid #ddd;
+                box-shadow: 0 5px 20px rgba(0,0,0,0.2); border-radius: 50px;
+                padding: 5px 20px; display: flex; align-items: center; gap: 15px;
+                pointer-events: auto; white-space: nowrap; font-family: sans-serif; color: #333;
+            ">
+                <div style="text-align: center; line-height: 1.1;">
+                    <div id="time-text" style="font-size: 20px; font-weight: bold;">00:00</div>
+                    <div style="font-size: 10px; color: #666;"><span id="date-text">...</span></div>
+                </div>
+                <div style="width: 1px; height: 30px; background: #ddd;"></div>
+                <iframe scrolling="no" src="https://i.tianqi.com/index.php?c=code&id=10&color=%23333&icon=1&site=12" frameborder="0" width="260" height="25" allowtransparency="true"></iframe>
+            </div>
 
-            // 2. 获取模板
-            const template = document.getElementById('floating-template');
-            if (!template) return;
+            <!-- B. AI 按钮 -->
+            <div id="gemini-trigger" onclick="window.toggleGeminiChat()" style="
+                position: fixed; bottom: 100px; right: 20px; z-index: 2147483647;
+                width: 50px; height: 50px; background: #764ba2; border-radius: 50%;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.3); cursor: pointer;
+                display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 24px;
+            ">✨</div>
 
-            // 3. 创建一个容器并克隆内容
-            const activeContainer = document.createElement('div');
-            activeContainer.id = 'floating-components-active';
-            activeContainer.innerHTML = template.innerHTML;
-            document.body.appendChild(activeContainer);
+            <!-- C. AI 窗口 -->
+            <div id="gemini-chat-window" style="
+                display: none; position: fixed; bottom: 160px; right: 20px; width: 320px; height: 450px;
+                background: white; border-radius: 12px; box-shadow: 0 10px 50px rgba(0,0,0,0.3);
+                z-index: 2147483647; flex-direction: column; border: 1px solid #eee; font-family: sans-serif;
+            ">
+                <div style="padding: 15px; border-bottom: 1px solid #eee; display:flex; justify-content:space-between; background:#f9f9f9;">
+                    <b>Gemini AI</b> <span onclick="window.toggleGeminiChat()" style="cursor:pointer; font-size:20px;">&times;</span>
+                </div>
+                <div id="chat-messages" style="flex:1; padding:15px; overflow-y:auto; background:#fff;">
+                    <div style="color:#888; font-size:13px;">👋 我是 AI 助手，问我点什么吧！</div>
+                </div>
+                <div style="padding:10px; border-top:1px solid #eee; display:flex;">
+                    <input id="user-input" type="text" placeholder="输入问题..." style="flex:1; padding:8px; border:1px solid #ddd; border-radius:4px;" onkeypress="if(event.key==='Enter') window.sendMessage()">
+                    <button onclick="window.sendMessage()" style="margin-left:5px; padding:0 15px; background:#764ba2; color:white; border:none; border-radius:4px; cursor:pointer;">发送</button>
+                </div>
+            </div>
+        `;
 
-            // 4. 清理模板 (可选)
-            template.remove();
+        function injectComponents() {
+            // 1. 检查是否已存在 (防止 PJAX 重复)
+            if (document.getElementById('injected-layer')) return;
 
-            // 5. 显形 (延迟一点点确保渲染)
-            setTimeout(() => {
-                const capsule = activeContainer.querySelector('#info-capsule-body');
-                const trigger = activeContainer.querySelector('#gemini-trigger');
-                if(capsule) { capsule.style.visibility = 'visible'; capsule.style.opacity = '1'; }
-                if(trigger) { trigger.style.visibility = 'visible'; trigger.style.opacity = '1'; }
-            }, 100);
+            // 2. 创建容器
+            const div = document.createElement('div');
+            div.id = 'injected-layer';
+            div.innerHTML = FLOAT_HTML;
+            
+            // 3. 暴力挂载到 Body (确保一定是 Body 的直接子元素)
+            document.body.appendChild(div);
 
-            // 6. 绑定逻辑 (必须在克隆后绑定，因为元素是新的)
-            bindLogic(activeContainer);
+            // 4. 启动逻辑
+            startLogic();
         }
 
-        function bindLogic(container) {
-            // --- 时钟逻辑 ---
-            const timeText = container.querySelector('#time-text');
-            const dateText = container.querySelector('#date-text');
-            const lunarText = container.querySelector('#lunar-text');
-
-            function updateClock() {
+        function startLogic() {
+            // 时钟
+            const timeText = document.getElementById('time-text');
+            const dateText = document.getElementById('date-text');
+            
+            setInterval(() => {
                 const now = new Date();
-                const hours = String(now.getHours()).padStart(2, '0');
-                const minutes = String(now.getMinutes()).padStart(2, '0');
-                if(timeText) timeText.innerText = `${hours}:${minutes}`;
+                if(timeText) timeText.innerText = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+                if(dateText) dateText.innerText = (now.getMonth()+1) + '月' + now.getDate() + '日';
+            }, 1000);
 
-                const months = now.getMonth() + 1;
-                const days = now.getDate();
-                const weekArr = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
-                const week = weekArr[now.getDay()];
-                if(dateText) dateText.innerText = `${months}月${days}日 ${week}`;
+            // AI 开关
+            window.toggleGeminiChat = function() {
+                const win = document.getElementById('gemini-chat-window');
+                win.style.display = (win.style.display === 'none') ? 'flex' : 'none';
+            };
+
+            // AI 发送
+            window.sendMessage = async function() {
+                const input = document.getElementById('user-input');
+                const box = document.getElementById('chat-messages');
+                const txt = input.value.trim();
+                if(!txt) return;
+
+                if (!GEMINI_API_KEY) {
+                    box.innerHTML += `<div style="color:red; margin:5px 0;">请配置 API Key</div>`; 
+                    return;
+                }
+
+                input.value = '';
+                box.innerHTML += `<div style="text-align:right; margin:5px 0;"><span style="background:#764ba2; color:white; padding:5px 10px; border-radius:10px;">${txt}</span></div>`;
+                box.innerHTML += `<div style="color:#aaa; font-size:12px;">思考中...</div>`;
+                box.scrollTop = box.scrollHeight;
 
                 try {
-                    const lunarDate = new Intl.DateTimeFormat('zh-CN-u-ca-chinese', { day: 'numeric', month: 'numeric' }).format(now);
-                    const cleanLunar = lunarDate.split(' ').pop().replace('月', '/');
-                    if(lunarText) lunarText.innerText = `农历${cleanLunar}`;
-                } catch (e) {}
-            }
-            updateClock();
-            setInterval(updateClock, 1000);
-
-            // --- 交互特效 ---
-            const capsule = container.querySelector('#info-capsule-body');
-            if(capsule) {
-                capsule.addEventListener('mouseenter', () => { capsule.style.transform = 'translateX(-50%) scale(1.02)'; capsule.style.background = 'rgba(255,255,255,0.95)'; });
-                capsule.addEventListener('mouseleave', () => { capsule.style.transform = 'translateX(-50%) scale(1)'; capsule.style.background = 'rgba(255,255,255,0.85)'; });
-            }
-        }
-
-        // --- 全局暴露给 HTML onclick 使用的函数 ---
-        window.toggleGeminiChat = function() {
-            const container = document.getElementById('floating-components-active');
-            if(!container) return;
-            const chatWindow = container.querySelector('#gemini-chat-window');
-            const input = container.querySelector('#user-input');
-            
-            if (chatWindow.style.display === 'none') {
-                chatWindow.style.display = 'flex';
-                chatWindow.style.opacity = '0';
-                chatWindow.style.transform = 'translateY(10px)';
-                setTimeout(() => {
-                    chatWindow.style.opacity = '1';
-                    chatWindow.style.transform = 'translateY(0)';
-                }, 10);
-                if(input) input.focus();
-            } else {
-                chatWindow.style.display = 'none';
-            }
-        }
-
-        window.handleKeyPress = function(e) {
-            if (e.key === 'Enter') window.sendMessage();
-        }
-
-        window.sendMessage = async function() {
-            const container = document.getElementById('floating-components-active');
-            const inputField = container.querySelector('#user-input');
-            const messagesDiv = container.querySelector('#chat-messages');
-            const text = inputField.value.trim();
-            if (!text) return;
-            
-            if (!GEMINI_API_KEY) {
-                appendMessage(messagesDiv, "⚠️ 请先在代码中配置 API Key", 'ai');
-                return;
-            }
-
-            inputField.value = '';
-            appendMessage(messagesDiv, text, 'user');
-            
-            const loadingId = 'loading-' + Date.now();
-            const loadingDiv = document.createElement('div');
-            loadingDiv.id = loadingId;
-            loadingDiv.style.marginBottom = '10px';
-            loadingDiv.style.color = '#999';
-            loadingDiv.style.fontSize = '12px';
-            loadingDiv.innerHTML = '✨ 思考中...';
-            messagesDiv.appendChild(loadingDiv);
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
-
-            try {
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${GEMINI_API_KEY}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ contents: [{ parts: [{ text: text }] }] })
-                });
-
-                const data = await response.json();
-                document.getElementById(loadingId)?.remove();
-
-                if (data.error) {
-                    appendMessage(messagesDiv, "Error: " + data.error.message, 'ai');
-                } else {
-                    const aiResponse = data.candidates[0].content.parts[0].text;
-                    appendMessage(messagesDiv, aiResponse, 'ai');
+                    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${GEMINI_API_KEY}`, {
+                        method: 'POST', headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({ contents: [{ parts: [{ text: txt }] }] })
+                    });
+                    const data = await res.json();
+                    box.lastElementChild.remove(); // 移除思考中
+                    
+                    if(data.error) {
+                        box.innerHTML += `<div style="color:red;">Error: ${data.error.message}</div>`;
+                    } else {
+                        const reply = data.candidates[0].content.parts[0].text;
+                        box.innerHTML += `<div style="margin:5px 0; background:#f1f1f1; padding:5px 10px; border-radius:10px; display:inline-block;">${reply}</div>`;
+                    }
+                } catch(e) {
+                    box.lastElementChild.remove();
+                    box.innerHTML += `<div style="color:red;">网络错误</div>`;
                 }
-            } catch (error) {
-                document.getElementById(loadingId)?.remove();
-                appendMessage(messagesDiv, "网络错误，请检查连接。", 'ai');
-            }
+                box.scrollTop = box.scrollHeight;
+            };
         }
 
-        function appendMessage(container, text, sender) {
-            if(!container) return;
-            const div = document.createElement('div');
-            div.style.marginBottom = '12px';
-            div.style.padding = '8px 12px';
-            div.style.borderRadius = '12px';
-            div.style.maxWidth = '85%';
-            div.style.lineHeight = '1.5';
-            div.style.wordWrap = 'break-word';
-            
-            if (sender === 'user') {
-                div.style.background = '#764ba2'; 
-                div.style.color = 'white';
-                div.style.marginLeft = 'auto'; 
-                div.style.borderBottomRightRadius = '2px';
-            } else {
-                div.style.background = 'rgba(0,0,0,0.05)'; 
-                div.style.color = '#333';
-                div.style.marginRight = 'auto'; 
-                div.style.borderBottomLeftRadius = '2px';
-            }
-            div.innerHTML = text.replace(/\n/g, '<br>');
-            container.appendChild(div);
-            container.scrollTop = container.scrollHeight;
-        }
+        // 双重保险启动 (立即运行 + Load 后再运行一次)
+        injectComponents();
+        window.addEventListener('load', injectComponents);
+        setTimeout(injectComponents, 1000); // 1秒后再试一次，防止被覆盖
 
-        // 启动逻辑 (确保 DOM Ready)
-        if (document.readyState === 'loading') {
-            window.addEventListener('load', initApp);
-        } else {
-            initApp();
-        }
     })();
 </script>
