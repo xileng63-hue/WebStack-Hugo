@@ -3,140 +3,94 @@
 <!-- ======================================================= -->
 <footer class="main-footer footer-type-1 text-xs">
     <div id="footer-tools" class="d-flex flex-column">
-        <!-- 回到顶部 -->
-        <a href="javascript:" id="go-to-up" class="btn rounded-circle go-up m-1" rel="go-top">
-            <i class="iconfont icon-to-up"></i>
-        </a>
-        
-        <!-- 搜索 -->
-        <a href="javascript:" data-toggle="modal" data-target="#search-modal" class="btn rounded-circle m-1" rel="search" one-link-mark="yes">
-            <i class="iconfont icon-search"></i>
-        </a>
-        
-        <!-- 客服 -->
-        <a href="https://github.com/shenweiyan/WebStack-Hugo" class="btn rounded-circle kefu m-1" target="_blank" data-toggle="tooltip" data-placement="left" title="联系我们">
-            <i class="mode-ico iconfont icon-qq"></i>
-        </a>
-        
-        <!-- 夜间模式切换 -->
+        <a href="javascript:" id="go-to-up" class="btn rounded-circle go-up m-1" rel="go-top"><i class="iconfont icon-to-up"></i></a>
+        <a href="javascript:" data-toggle="modal" data-target="#search-modal" class="btn rounded-circle m-1" rel="search"><i class="iconfont icon-search"></i></a>
+        <a href="https://github.com/shenweiyan/WebStack-Hugo" class="btn rounded-circle kefu m-1" target="_blank"><i class="mode-ico iconfont icon-qq"></i></a>
         {{ if $.Site.Params.nightMode }}
-        <a href="javascript:" onclick="window.location.href='javascript:switchNightMode()'" class="btn rounded-circle switch-dark-mode m-1" id="yejian"
-            data-toggle="tooltip" data-placement="left" title="夜间模式">
-            <i class="mode-ico iconfont icon-light"></i>
-        </a>
+        <a href="javascript:" onclick="window.location.href='javascript:switchNightMode()'" class="btn rounded-circle switch-dark-mode m-1" id="yejian" title="夜间模式"><i class="mode-ico iconfont icon-light"></i></a>
         {{ else }}
-        <a href="javascript:" onclick="window.location.href='javascript:switchNightMode()'" class="btn rounded-circle switch-dark-mode m-1" id="yejian"
-            data-toggle="tooltip" data-placement="left" title="日间模式">
-            <i class="mode-ico iconfont icon-night"></i>
-        </a>
+        <a href="javascript:" onclick="window.location.href='javascript:switchNightMode()'" class="btn rounded-circle switch-dark-mode m-1" id="yejian" title="日间模式"><i class="mode-ico iconfont icon-night"></i></a>
         {{ end }}
     </div>
-
-    <!-- 版权信息 -->
     <div class="footer-inner">
-        <div class="footer-text">
-            &copy; 2025 <strong>我的专属导航站</strong> | 
-            <a href="https://github.com/WebStackPage/WebStack-Hugo" target="_blank">WebStack-Hugo</a>
-        </div>
+        <div class="footer-text">&copy; 2025 <strong>我的专属导航站</strong></div>
     </div>
 </footer>
 
 <!-- ======================================================= -->
-<!-- 2. 强力注入脚本 (不依赖HTML结构，直接生成) -->
+<!-- 2. 天气组件 (纯 HTML 结构，不依赖 JS 生成) -->
+<!-- ======================================================= -->
+<!-- 使用 !important 强制层级和显示 -->
+<div id="fixed-weather-capsule" style="
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: fixed !important; 
+    top: 15px !important; 
+    left: 50% !important; 
+    transform: translateX(-50%) !important; 
+    z-index: 2147483647 !important; 
+    
+    background: rgba(255, 255, 255, 0.95); 
+    border: 1px solid #ddd;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15); 
+    border-radius: 50px;
+    padding: 6px 20px; 
+    align-items: center; 
+    gap: 15px;
+    height: 40px;
+    
+    font-family: sans-serif;
+    color: #333;
+    pointer-events: auto;
+">
+    <!-- 左侧：时间 (默认显示 Loading，防止 JS 挂了之后空白) -->
+    <div style="text-align: center; line-height: 1.1; min-width: 70px;">
+        <div id="inject-time" style="font-size: 20px; font-weight: 700; color: #1d1d1f;">--:--</div>
+        <div id="inject-date" style="font-size: 10px; color: #666; margin-top: 2px;">日期加载中</div>
+    </div>
+    
+    <!-- 分隔线 -->
+    <div style="width: 1px; height: 25px; background: #ccc;"></div>
+
+    <!-- 右侧：中国天气网 -->
+    <div style="display: flex; align-items: center; justify-content: center;">
+        <iframe scrolling="no" src="https://i.tianqi.com/index.php?c=code&id=10&color=%23333&icon=1&site=12" frameborder="0" width="240" height="25" allowtransparency="true"></iframe>
+    </div>
+</div>
+
+<!-- ======================================================= -->
+<!-- 3. 简单的时钟脚本 -->
 <!-- ======================================================= -->
 <script>
     (function() {
-        // 定义天气组件的 HTML 结构 (作为字符串)
-        // 这样可以避免 iframe 在 display:none 中无法加载的问题
-        var widgetHTML = `
-            <div id="fixed-weather-capsule" style="
-                position: fixed; 
-                top: 20px; 
-                left: 50%; 
-                transform: translateX(-50%); 
-                z-index: 2147483647; 
-                background: rgba(255, 255, 255, 0.9); 
-                backdrop-filter: blur(10px); 
-                -webkit-backdrop-filter: blur(10px);
-                border: 1px solid #ddd;
-                box-shadow: 0 4px 20px rgba(0,0,0,0.1); 
-                border-radius: 50px;
-                padding: 5px 20px; 
-                display: flex; 
-                align-items: center; 
-                gap: 15px;
-                font-family: -apple-system, sans-serif;
-                color: #333;
-                white-space: nowrap;
-                pointer-events: auto;
-            ">
-                <!-- 左侧：时间 -->
-                <div style="text-align: center; line-height: 1.1; min-width: 70px;">
-                    <div id="inject-time" style="font-size: 22px; font-weight: 700; color: #1d1d1f;">00:00</div>
-                    <div id="inject-date" style="font-size: 10px; color: #666; margin-top: 2px;">Loading...</div>
-                </div>
-                
-                <!-- 分隔线 -->
-                <div style="width: 1px; height: 30px; background: rgba(0,0,0,0.15);"></div>
-
-                <!-- 右侧：中国天气网 (官方源) -->
-                <div style="display: flex; align-items: center; justify-content: center;">
-                    <iframe scrolling="no" src="https://i.tianqi.com/index.php?c=code&id=10&color=%23333&icon=1&site=12" frameborder="0" width="240" height="25" allowtransparency="true"></iframe>
-                </div>
-            </div>
-        `;
-
-        // 核心函数：创建并插入组件
-        function injectWidget() {
-            // 1. 检查是否已经存在 (防止重复)
-            if (document.getElementById('fixed-weather-capsule')) return;
-
-            // 2. 创建一个临时容器
-            var div = document.createElement('div');
-            div.innerHTML = widgetHTML;
-
-            // 3. 将生成的胶囊直接挂载到 body (网页最外层)
-            // 这步操作等同于直接把贴纸贴在屏幕最上层
-            document.body.appendChild(div.firstElementChild);
-
-            // 4. 启动时钟
-            startClock();
-        }
-
-        // 时钟逻辑
-        function startClock() {
-            var timeEl = document.getElementById('inject-time');
-            var dateEl = document.getElementById('inject-date');
-            
-            if (!timeEl) return;
-
-            function update() {
-                var now = new Date();
-                var h = now.getHours().toString().padStart(2, '0');
-                var m = now.getMinutes().toString().padStart(2, '0');
-                timeEl.innerText = h + ':' + m;
-                
-                var month = now.getMonth() + 1;
-                var day = now.getDate();
-                var weeks = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
-                var w = weeks[now.getDay()];
-                dateEl.innerText = month + '月' + day + '日 ' + w;
+        // 为了防止组件被父级容器遮挡，尝试将其移到 body 下
+        // 即使这一步失败，上面的 HTML 也会显示，只是位置可能受限
+        try {
+            var capsule = document.getElementById('fixed-weather-capsule');
+            if (capsule && document.body && capsule.parentNode !== document.body) {
+                document.body.appendChild(capsule);
             }
-            update();
-            setInterval(update, 1000);
+        } catch(e) { console.log('搬运失败，保持原位'); }
+
+        // 启动时钟
+        var timeEl = document.getElementById('inject-time');
+        var dateEl = document.getElementById('inject-date');
+        
+        function update() {
+            var now = new Date();
+            var h = now.getHours().toString().padStart(2, '0');
+            var m = now.getMinutes().toString().padStart(2, '0');
+            if(timeEl) timeEl.innerText = h + ':' + m;
+            
+            var month = now.getMonth() + 1;
+            var day = now.getDate();
+            var weeks = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
+            var w = weeks[now.getDay()];
+            if(dateEl) dateEl.innerText = month + '月' + day + '日 ' + w;
         }
-
-        // --- 执行策略 ---
-        // 1. 立即尝试运行 (如果脚本加载时 body 已存在)
-        if (document.body) {
-            injectWidget();
-        }
-
-        // 2. 页面加载完毕后再次尝试 (双重保险)
-        window.addEventListener('load', injectWidget);
-
-        // 3. 延迟 1 秒再试一次 (防止被其他脚本覆盖)
-        setTimeout(injectWidget, 1000);
-
+        
+        setInterval(update, 1000);
+        update(); // 立即执行一次
     })();
 </script>
