@@ -1,5 +1,5 @@
 <!-- ======================================================= -->
-<!-- 1. 原生页脚区 (保留按钮) -->
+<!-- 1. 原生页脚区 (这一部分是你确认可以显示的) -->
 <!-- ======================================================= -->
 <footer class="main-footer footer-type-1 text-xs">
     <div id="footer-tools" class="d-flex flex-column">
@@ -18,134 +18,171 @@
 </footer>
 
 <!-- ======================================================= -->
-<!-- 2. 暴力注入脚本 (直接把组件写进 Body) -->
+<!-- 2. 悬浮组件区 (直接写死在HTML里，保证加载) -->
+<!-- ======================================================= -->
+<div id="custom-floating-layer" style="display:none;"> <!-- 暂时隐藏，等脚本搬运 -->
+    
+    <!-- A. 顶部天气胶囊 -->
+    <div id="my-weather-capsule" style="
+        position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 2147483647;
+        background: rgba(255, 255, 255, 0.9); border: 1px solid #e0e0e0;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.12); border-radius: 50px;
+        padding: 5px 20px; display: flex; align-items: center; gap: 15px;
+        pointer-events: auto; white-space: nowrap; color: #333; font-family: sans-serif;
+        backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    ">
+        <!-- 时间部分 -->
+        <div style="text-align: center; line-height: 1.1; min-width: 60px;">
+            <div id="my-clock-time" style="font-size: 22px; font-weight: 700; color: #333;">00:00</div>
+            <div id="my-clock-date" style="font-size: 10px; color: #666;">Loading...</div>
+        </div>
+        <!-- 分割线 -->
+        <div style="width: 1px; height: 30px; background: #ddd;"></div>
+        <!-- 天气插件 (中国天气网) -->
+        <div style="display: flex; align-items: center;">
+            <iframe scrolling="no" src="https://i.tianqi.com/index.php?c=code&id=10&color=%23333&icon=1&site=12" frameborder="0" width="220" height="25" allowtransparency="true"></iframe>
+        </div>
+    </div>
+
+    <!-- B. 右下角 AI 悬浮球 -->
+    <div id="my-ai-trigger" onclick="toggleMyAI()" style="
+        position: fixed; bottom: 100px; right: 20px; z-index: 2147483647;
+        width: 50px; height: 50px; background: linear-gradient(135deg, #667eea, #764ba2);
+        border-radius: 50%; box-shadow: 0 4px 15px rgba(118, 75, 162, 0.5);
+        cursor: pointer; display: flex; align-items: center; justify-content: center;
+        color: white; font-size: 24px; transition: transform 0.2s;
+    ">
+        ✨
+    </div>
+
+    <!-- C. AI 聊天窗口 -->
+    <div id="my-ai-window" style="
+        display: none; position: fixed; bottom: 160px; right: 20px; 
+        width: 320px; height: 450px; background: rgba(255, 255, 255, 0.95);
+        border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        z-index: 2147483647; flex-direction: column; border: 1px solid #eee;
+        backdrop-filter: blur(20px); font-family: sans-serif;
+    ">
+        <!-- 标题栏 -->
+        <div style="padding: 15px; border-bottom: 1px solid #eee; display:flex; justify-content:space-between; align-items:center; background:rgba(240,240,240,0.5);">
+            <strong style="color:#333;">Gemini 助手</strong>
+            <span onclick="toggleMyAI()" style="cursor:pointer; font-size:24px; line-height:1; color:#999;">&times;</span>
+        </div>
+        <!-- 消息区 -->
+        <div id="my-ai-messages" style="flex:1; padding:15px; overflow-y:auto; font-size:14px;">
+            <div style="background:#f0f0f0; padding:10px; border-radius:10px; display:inline-block; color:#666;">
+                👋 你好！我是 AI 助手，有什么可以帮你的？
+            </div>
+        </div>
+        <!-- 输入区 -->
+        <div style="padding:10px; border-top:1px solid #eee; display:flex; gap:8px;">
+            <input id="my-ai-input" type="text" placeholder="输入问题..." style="flex:1; padding:10px; border:1px solid #ddd; border-radius:20px; outline:none;" onkeypress="if(event.key==='Enter') sendMyMessage()">
+            <button onclick="sendMyMessage()" style="background:#764ba2; color:white; border:none; width:40px; height:40px; border-radius:50%; cursor:pointer;">➤</button>
+        </div>
+    </div>
+
+</div>
+
+<!-- ======================================================= -->
+<!-- 3. 激活脚本 -->
 <!-- ======================================================= -->
 <script>
     (function() {
-        // ⚠️ API Key 填这里
-        const GEMINI_API_KEY = 'AIzaSyCJogRHhJ8ib96V01JpZW-upOnhdrv3NAU'; 
+        // ⚠️ API Key 填这里 ⚠️
+        const API_KEY = 'AIzaSyCJogRHhJ8ib96V01JpZW-upOnhdrv3NAU'; 
 
-        // 核心：HTML 字符串 (天气 + AI)
-        const FLOAT_HTML = `
-            <!-- A. 天气胶囊 -->
-            <div id="info-capsule-body" style="
-                position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 2147483647;
-                background: rgba(255, 255, 255, 0.9); border: 1px solid #ddd;
-                box-shadow: 0 5px 20px rgba(0,0,0,0.2); border-radius: 50px;
-                padding: 5px 20px; display: flex; align-items: center; gap: 15px;
-                pointer-events: auto; white-space: nowrap; font-family: sans-serif; color: #333;
-            ">
-                <div style="text-align: center; line-height: 1.1;">
-                    <div id="time-text" style="font-size: 20px; font-weight: bold;">00:00</div>
-                    <div style="font-size: 10px; color: #666;"><span id="date-text">...</span></div>
-                </div>
-                <div style="width: 1px; height: 30px; background: #ddd;"></div>
-                <iframe scrolling="no" src="https://i.tianqi.com/index.php?c=code&id=10&color=%23333&icon=1&site=12" frameborder="0" width="260" height="25" allowtransparency="true"></iframe>
-            </div>
-
-            <!-- B. AI 按钮 -->
-            <div id="gemini-trigger" onclick="window.toggleGeminiChat()" style="
-                position: fixed; bottom: 100px; right: 20px; z-index: 2147483647;
-                width: 50px; height: 50px; background: #764ba2; border-radius: 50%;
-                box-shadow: 0 4px 15px rgba(0,0,0,0.3); cursor: pointer;
-                display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 24px;
-            ">✨</div>
-
-            <!-- C. AI 窗口 -->
-            <div id="gemini-chat-window" style="
-                display: none; position: fixed; bottom: 160px; right: 20px; width: 320px; height: 450px;
-                background: white; border-radius: 12px; box-shadow: 0 10px 50px rgba(0,0,0,0.3);
-                z-index: 2147483647; flex-direction: column; border: 1px solid #eee; font-family: sans-serif;
-            ">
-                <div style="padding: 15px; border-bottom: 1px solid #eee; display:flex; justify-content:space-between; background:#f9f9f9;">
-                    <b>Gemini AI</b> <span onclick="window.toggleGeminiChat()" style="cursor:pointer; font-size:20px;">&times;</span>
-                </div>
-                <div id="chat-messages" style="flex:1; padding:15px; overflow-y:auto; background:#fff;">
-                    <div style="color:#888; font-size:13px;">👋 我是 AI 助手，问我点什么吧！</div>
-                </div>
-                <div style="padding:10px; border-top:1px solid #eee; display:flex;">
-                    <input id="user-input" type="text" placeholder="输入问题..." style="flex:1; padding:8px; border:1px solid #ddd; border-radius:4px;" onkeypress="if(event.key==='Enter') window.sendMessage()">
-                    <button onclick="window.sendMessage()" style="margin-left:5px; padding:0 15px; background:#764ba2; color:white; border:none; border-radius:4px; cursor:pointer;">发送</button>
-                </div>
-            </div>
-        `;
-
-        function injectComponents() {
-            // 1. 检查是否已存在 (防止 PJAX 重复)
-            if (document.getElementById('injected-layer')) return;
-
-            // 2. 创建容器
-            const div = document.createElement('div');
-            div.id = 'injected-layer';
-            div.innerHTML = FLOAT_HTML;
-            
-            // 3. 暴力挂载到 Body (确保一定是 Body 的直接子元素)
-            document.body.appendChild(div);
-
-            // 4. 启动逻辑
-            startLogic();
+        // 搬运函数：把组件从页脚搬到 body 最外层
+        function moveComponentsToBody() {
+            var layer = document.getElementById('custom-floating-layer');
+            if (layer && document.body) {
+                document.body.appendChild(layer); // 移动元素
+                layer.style.display = 'block';    // 显示元素
+            }
         }
 
-        function startLogic() {
-            // 时钟
-            const timeText = document.getElementById('time-text');
-            const dateText = document.getElementById('date-text');
-            
-            setInterval(() => {
-                const now = new Date();
-                if(timeText) timeText.innerText = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
-                if(dateText) dateText.innerText = (now.getMonth()+1) + '月' + now.getDate() + '日';
+        // 时钟逻辑
+        function startMyClock() {
+            var timeEl = document.getElementById('my-clock-time');
+            var dateEl = document.getElementById('my-clock-date');
+            if(!timeEl) return;
+
+            setInterval(function() {
+                var now = new Date();
+                var h = now.getHours().toString().padStart(2,'0');
+                var m = now.getMinutes().toString().padStart(2,'0');
+                timeEl.innerText = h + ':' + m;
+                dateEl.innerText = (now.getMonth()+1) + '月' + now.getDate() + '日';
             }, 1000);
-
-            // AI 开关
-            window.toggleGeminiChat = function() {
-                const win = document.getElementById('gemini-chat-window');
-                win.style.display = (win.style.display === 'none') ? 'flex' : 'none';
-            };
-
-            // AI 发送
-            window.sendMessage = async function() {
-                const input = document.getElementById('user-input');
-                const box = document.getElementById('chat-messages');
-                const txt = input.value.trim();
-                if(!txt) return;
-
-                if (!GEMINI_API_KEY) {
-                    box.innerHTML += `<div style="color:red; margin:5px 0;">请配置 API Key</div>`; 
-                    return;
-                }
-
-                input.value = '';
-                box.innerHTML += `<div style="text-align:right; margin:5px 0;"><span style="background:#764ba2; color:white; padding:5px 10px; border-radius:10px;">${txt}</span></div>`;
-                box.innerHTML += `<div style="color:#aaa; font-size:12px;">思考中...</div>`;
-                box.scrollTop = box.scrollHeight;
-
-                try {
-                    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${GEMINI_API_KEY}`, {
-                        method: 'POST', headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify({ contents: [{ parts: [{ text: txt }] }] })
-                    });
-                    const data = await res.json();
-                    box.lastElementChild.remove(); // 移除思考中
-                    
-                    if(data.error) {
-                        box.innerHTML += `<div style="color:red;">Error: ${data.error.message}</div>`;
-                    } else {
-                        const reply = data.candidates[0].content.parts[0].text;
-                        box.innerHTML += `<div style="margin:5px 0; background:#f1f1f1; padding:5px 10px; border-radius:10px; display:inline-block;">${reply}</div>`;
-                    }
-                } catch(e) {
-                    box.lastElementChild.remove();
-                    box.innerHTML += `<div style="color:red;">网络错误</div>`;
-                }
-                box.scrollTop = box.scrollHeight;
-            };
         }
 
-        // 双重保险启动 (立即运行 + Load 后再运行一次)
-        injectComponents();
-        window.addEventListener('load', injectComponents);
-        setTimeout(injectComponents, 1000); // 1秒后再试一次，防止被覆盖
+        // AI 开关逻辑 (挂载到window以供HTML调用)
+        window.toggleMyAI = function() {
+            var win = document.getElementById('my-ai-window');
+            if(win.style.display === 'none') {
+                win.style.display = 'flex';
+                document.getElementById('my-ai-input').focus();
+            } else {
+                win.style.display = 'none';
+            }
+        };
+
+        // AI 发送逻辑
+        window.sendMyMessage = async function() {
+            var input = document.getElementById('my-ai-input');
+            var box = document.getElementById('my-ai-messages');
+            var text = input.value.trim();
+            if(!text) return;
+
+            if(!API_KEY) {
+                box.innerHTML += '<div style="color:red; margin:10px 0;">请在代码中配置 API Key</div>';
+                return;
+            }
+
+            // 显示用户消息
+            input.value = '';
+            box.innerHTML += '<div style="text-align:right; margin:10px 0;"><span style="background:#764ba2; color:white; padding:8px 12px; border-radius:12px; display:inline-block;">' + text + '</span></div>';
+            box.scrollTop = box.scrollHeight;
+
+            // 显示Loading
+            var loadingId = 'load-' + Date.now();
+            box.innerHTML += '<div id="' + loadingId + '" style="color:#999; font-size:12px; margin:5px;">✨ 思考中...</div>';
+            box.scrollTop = box.scrollHeight;
+
+            try {
+                var res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=' + API_KEY, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ contents: [{ parts: [{ text: text }] }] })
+                });
+                var data = await res.json();
+                var loader = document.getElementById(loadingId);
+                if(loader) loader.remove();
+
+                if(data.error) {
+                    box.innerHTML += '<div style="color:red; margin:10px 0;">Error: ' + data.error.message + '</div>';
+                } else {
+                    var reply = data.candidates[0].content.parts[0].text;
+                    // 简单转义换行
+                    reply = reply.replace(/\n/g, '<br>');
+                    box.innerHTML += '<div style="text-align:left; margin:10px 0;"><span style="background:#f1f1f1; color:#333; padding:8px 12px; border-radius:12px; display:inline-block;">' + reply + '</span></div>';
+                }
+            } catch(e) {
+                var loader = document.getElementById(loadingId);
+                if(loader) loader.remove();
+                box.innerHTML += '<div style="color:red; margin:10px 0;">网络连接失败</div>';
+            }
+            box.scrollTop = box.scrollHeight;
+        };
+
+        // 启动流程
+        // 1. 立即尝试搬运
+        moveComponentsToBody();
+        startMyClock();
+
+        // 2. 页面加载完后再搬运一次 (双保险)
+        window.addEventListener('load', function() {
+            moveComponentsToBody();
+        });
 
     })();
 </script>
