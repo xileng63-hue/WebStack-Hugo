@@ -38,8 +38,8 @@ publishDir            = "public"				# 站点静态文件保存目录
     favicon           = "https://cdn-icons-png.flaticon.com/128/2215/2215535.png"
     searchImageL      = "assets/images/bg-dna.jpg"		# 搜索部分浅色背景图
     searchImageD      = "assets/images/bg-dna.jpg"		# 搜索部分深色背景图
-    logoExpandLight   = "assets/images/bi-expand-dark.png"
-    logoExpandDark    = "assets/images/bi-expand-light.png"
+    logoExpandLight   = "https://cdn-icons-png.flaticon.com/512/2985/2985150.png"
+    logoExpandDark    = "https://cdn-icons-png.flaticon.com/512/2985/2985150.png"
     logoCollapseLight = "https://cdn-icons-png.flaticon.com/128/2215/2215535.png"
     logoCollapseDark  = "https://cdn-icons-png.flaticon.com/128/2215/2215535.png"
     
