@@ -1,188 +1,147 @@
 <!-- ======================================================= -->
-<!-- 1. 原生页脚区 (这一部分是你确认可以显示的) -->
+<!-- 1. 原生页脚区 (保留所有原有按钮) -->
 <!-- ======================================================= -->
 <footer class="main-footer footer-type-1 text-xs">
     <div id="footer-tools" class="d-flex flex-column">
-        <a href="javascript:" id="go-to-up" class="btn rounded-circle go-up m-1" rel="go-top"><i class="iconfont icon-to-up"></i></a>
-        <a href="javascript:" data-toggle="modal" data-target="#search-modal" class="btn rounded-circle m-1" rel="search"><i class="iconfont icon-search"></i></a>
-        <a href="https://github.com/shenweiyan/WebStack-Hugo" class="btn rounded-circle kefu m-1" target="_blank"><i class="mode-ico iconfont icon-qq"></i></a>
+        <!-- 回到顶部 -->
+        <a href="javascript:" id="go-to-up" class="btn rounded-circle go-up m-1" rel="go-top">
+            <i class="iconfont icon-to-up"></i>
+        </a>
+        
+        <!-- 搜索 -->
+        <a href="javascript:" data-toggle="modal" data-target="#search-modal" class="btn rounded-circle m-1" rel="search" one-link-mark="yes">
+            <i class="iconfont icon-search"></i>
+        </a>
+        
+        <!-- 客服 -->
+        <a href="https://github.com/shenweiyan/WebStack-Hugo" class="btn rounded-circle kefu m-1" target="_blank" data-toggle="tooltip" data-placement="left" title="联系我们">
+            <i class="mode-ico iconfont icon-qq"></i>
+        </a>
+        
+        <!-- 夜间模式切换 (核心) -->
         {{ if $.Site.Params.nightMode }}
-        <a href="javascript:" onclick="window.location.href='javascript:switchNightMode()'" class="btn rounded-circle switch-dark-mode m-1" id="yejian" title="夜间模式"><i class="mode-ico iconfont icon-light"></i></a>
+        <a href="javascript:" onclick="window.location.href='javascript:switchNightMode()'" class="btn rounded-circle switch-dark-mode m-1" id="yejian"
+            data-toggle="tooltip" data-placement="left" title="夜间模式">
+            <i class="mode-ico iconfont icon-light"></i>
+        </a>
         {{ else }}
-        <a href="javascript:" onclick="window.location.href='javascript:switchNightMode()'" class="btn rounded-circle switch-dark-mode m-1" id="yejian" title="日间模式"><i class="mode-ico iconfont icon-night"></i></a>
+        <a href="javascript:" onclick="window.location.href='javascript:switchNightMode()'" class="btn rounded-circle switch-dark-mode m-1" id="yejian"
+            data-toggle="tooltip" data-placement="left" title="日间模式">
+            <i class="mode-ico iconfont icon-night"></i>
+        </a>
         {{ end }}
     </div>
+
+    <!-- 版权信息 -->
     <div class="footer-inner">
-        <div class="footer-text">&copy; 2025 <strong>我的专属导航站</strong></div>
+        <div class="footer-text">
+            &copy; 2025 <strong>我的专属导航站</strong> | 
+            <a href="https://github.com/WebStackPage/WebStack-Hugo" target="_blank">WebStack-Hugo</a>
+        </div>
     </div>
 </footer>
 
 <!-- ======================================================= -->
-<!-- 2. 悬浮组件区 (直接写死在HTML里，保证加载) -->
+<!-- 2. 天气胶囊容器 (等待脚本搬运) -->
 <!-- ======================================================= -->
-<div id="custom-floating-layer" style="display:none;"> <!-- 暂时隐藏，等脚本搬运 -->
-    
-    <!-- A. 顶部天气胶囊 -->
-    <div id="my-weather-capsule" style="
-        position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 2147483647;
-        background: rgba(255, 255, 255, 0.9); border: 1px solid #e0e0e0;
-        box-shadow: 0 8px 30px rgba(0,0,0,0.12); border-radius: 50px;
-        padding: 5px 20px; display: flex; align-items: center; gap: 15px;
-        pointer-events: auto; white-space: nowrap; color: #333; font-family: sans-serif;
-        backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+<div id="weather-capsule-layer" style="display: none;">
+    <div id="weather-capsule-real" style="
+        position: fixed; 
+        top: 20px; 
+        left: 50%; 
+        transform: translateX(-50%); 
+        z-index: 2147483647; /* 保证最顶层 */
+        
+        /* 磨砂玻璃外观 */
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(20px) saturate(180%);
+        -webkit-backdrop-filter: blur(20px) saturate(180%);
+        border: 1px solid rgba(255, 255, 255, 0.6);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+        border-radius: 50px;
+        
+        /* 布局 */
+        padding: 5px 20px;
+        display: flex;
+        align-items: center; 
+        justify-content: center;
+        gap: 15px;
+        
+        /* 字体 */
+        font-family: -apple-system, sans-serif;
+        color: #333;
+        white-space: nowrap;
+        pointer-events: auto;
     ">
-        <!-- 时间部分 -->
-        <div style="text-align: center; line-height: 1.1; min-width: 60px;">
-            <div id="my-clock-time" style="font-size: 22px; font-weight: 700; color: #333;">00:00</div>
-            <div id="my-clock-date" style="font-size: 10px; color: #666;">Loading...</div>
-        </div>
-        <!-- 分割线 -->
-        <div style="width: 1px; height: 30px; background: #ddd;"></div>
-        <!-- 天气插件 (中国天气网) -->
-        <div style="display: flex; align-items: center;">
-            <iframe scrolling="no" src="https://i.tianqi.com/index.php?c=code&id=10&color=%23333&icon=1&site=12" frameborder="0" width="220" height="25" allowtransparency="true"></iframe>
-        </div>
-    </div>
+       <!-- 左侧：时间 -->
+       <div style="text-align: center; line-height: 1.1; min-width: 70px;">
+           <div id="clock-time" style="font-size: 22px; font-weight: 700; color: #1d1d1f;">00:00</div>
+           <div id="clock-date" style="font-size: 10px; color: #666; margin-top: 2px;">Loading...</div>
+       </div>
+       
+       <!-- 分隔线 -->
+       <div style="width: 1px; height: 30px; background: rgba(0,0,0,0.15);"></div>
 
-    <!-- B. 右下角 AI 悬浮球 -->
-    <div id="my-ai-trigger" onclick="toggleMyAI()" style="
-        position: fixed; bottom: 100px; right: 20px; z-index: 2147483647;
-        width: 50px; height: 50px; background: linear-gradient(135deg, #667eea, #764ba2);
-        border-radius: 50%; box-shadow: 0 4px 15px rgba(118, 75, 162, 0.5);
-        cursor: pointer; display: flex; align-items: center; justify-content: center;
-        color: white; font-size: 24px; transition: transform 0.2s;
-    ">
-        ✨
+       <!-- 右侧：中国天气网 -->
+       <div style="display: flex; align-items: center; justify-content: center;">
+           <iframe scrolling="no" src="https://i.tianqi.com/index.php?c=code&id=10&color=%23333&icon=1&site=12" frameborder="0" width="240" height="25" allowtransparency="true"></iframe>
+       </div>
     </div>
-
-    <!-- C. AI 聊天窗口 -->
-    <div id="my-ai-window" style="
-        display: none; position: fixed; bottom: 160px; right: 20px; 
-        width: 320px; height: 450px; background: rgba(255, 255, 255, 0.95);
-        border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-        z-index: 2147483647; flex-direction: column; border: 1px solid #eee;
-        backdrop-filter: blur(20px); font-family: sans-serif;
-    ">
-        <!-- 标题栏 -->
-        <div style="padding: 15px; border-bottom: 1px solid #eee; display:flex; justify-content:space-between; align-items:center; background:rgba(240,240,240,0.5);">
-            <strong style="color:#333;">Gemini 助手</strong>
-            <span onclick="toggleMyAI()" style="cursor:pointer; font-size:24px; line-height:1; color:#999;">&times;</span>
-        </div>
-        <!-- 消息区 -->
-        <div id="my-ai-messages" style="flex:1; padding:15px; overflow-y:auto; font-size:14px;">
-            <div style="background:#f0f0f0; padding:10px; border-radius:10px; display:inline-block; color:#666;">
-                👋 你好！我是 AI 助手，有什么可以帮你的？
-            </div>
-        </div>
-        <!-- 输入区 -->
-        <div style="padding:10px; border-top:1px solid #eee; display:flex; gap:8px;">
-            <input id="my-ai-input" type="text" placeholder="输入问题..." style="flex:1; padding:10px; border:1px solid #ddd; border-radius:20px; outline:none;" onkeypress="if(event.key==='Enter') sendMyMessage()">
-            <button onclick="sendMyMessage()" style="background:#764ba2; color:white; border:none; width:40px; height:40px; border-radius:50%; cursor:pointer;">➤</button>
-        </div>
-    </div>
-
 </div>
 
 <!-- ======================================================= -->
-<!-- 3. 激活脚本 -->
+<!-- 3. 搬运脚本 (极其简单，不易出错) -->
 <!-- ======================================================= -->
 <script>
     (function() {
-        // ⚠️ API Key 填这里 ⚠️
-        const API_KEY = 'AIzaSyCJogRHhJ8ib96V01JpZW-upOnhdrv3NAU'; 
-
-        // 搬运函数：把组件从页脚搬到 body 最外层
-        function moveComponentsToBody() {
-            var layer = document.getElementById('custom-floating-layer');
-            if (layer && document.body) {
-                document.body.appendChild(layer); // 移动元素
-                layer.style.display = 'block';    // 显示元素
+        function initWeatherBar() {
+            // 1. 找到源元素
+            var layer = document.getElementById('weather-capsule-layer');
+            var realCapsule = document.getElementById('weather-capsule-real');
+            
+            // 2. 如果元素存在且还没被搬运
+            if (layer && realCapsule && document.body) {
+                // 3. 将真正的胶囊移动到 body 最下面 (脱离 footer 限制)
+                document.body.appendChild(realCapsule);
+                // 4. 清理旧容器
+                layer.remove();
             }
+            
+            // 5. 启动时钟
+            startClock();
         }
 
-        // 时钟逻辑
-        function startMyClock() {
-            var timeEl = document.getElementById('my-clock-time');
-            var dateEl = document.getElementById('my-clock-date');
-            if(!timeEl) return;
+        function startClock() {
+            var timeEl = document.getElementById('clock-time');
+            var dateEl = document.getElementById('clock-date');
+            
+            if (!timeEl) return;
 
-            setInterval(function() {
+            function update() {
                 var now = new Date();
-                var h = now.getHours().toString().padStart(2,'0');
-                var m = now.getMinutes().toString().padStart(2,'0');
+                // 时间
+                var h = now.getHours().toString().padStart(2, '0');
+                var m = now.getMinutes().toString().padStart(2, '0');
                 timeEl.innerText = h + ':' + m;
-                dateEl.innerText = (now.getMonth()+1) + '月' + now.getDate() + '日';
-            }, 1000);
+                
+                // 日期
+                var m = now.getMonth() + 1;
+                var d = now.getDate();
+                // 简单的星期数组
+                var weeks = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
+                var w = weeks[now.getDay()];
+                dateEl.innerText = m + '月' + d + '日 ' + w;
+            }
+            
+            update();
+            setInterval(update, 1000);
         }
 
-        // AI 开关逻辑 (挂载到window以供HTML调用)
-        window.toggleMyAI = function() {
-            var win = document.getElementById('my-ai-window');
-            if(win.style.display === 'none') {
-                win.style.display = 'flex';
-                document.getElementById('my-ai-input').focus();
-            } else {
-                win.style.display = 'none';
-            }
-        };
-
-        // AI 发送逻辑
-        window.sendMyMessage = async function() {
-            var input = document.getElementById('my-ai-input');
-            var box = document.getElementById('my-ai-messages');
-            var text = input.value.trim();
-            if(!text) return;
-
-            if(!API_KEY) {
-                box.innerHTML += '<div style="color:red; margin:10px 0;">请在代码中配置 API Key</div>';
-                return;
-            }
-
-            // 显示用户消息
-            input.value = '';
-            box.innerHTML += '<div style="text-align:right; margin:10px 0;"><span style="background:#764ba2; color:white; padding:8px 12px; border-radius:12px; display:inline-block;">' + text + '</span></div>';
-            box.scrollTop = box.scrollHeight;
-
-            // 显示Loading
-            var loadingId = 'load-' + Date.now();
-            box.innerHTML += '<div id="' + loadingId + '" style="color:#999; font-size:12px; margin:5px;">✨ 思考中...</div>';
-            box.scrollTop = box.scrollHeight;
-
-            try {
-                var res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=' + API_KEY, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ contents: [{ parts: [{ text: text }] }] })
-                });
-                var data = await res.json();
-                var loader = document.getElementById(loadingId);
-                if(loader) loader.remove();
-
-                if(data.error) {
-                    box.innerHTML += '<div style="color:red; margin:10px 0;">Error: ' + data.error.message + '</div>';
-                } else {
-                    var reply = data.candidates[0].content.parts[0].text;
-                    // 简单转义换行
-                    reply = reply.replace(/\n/g, '<br>');
-                    box.innerHTML += '<div style="text-align:left; margin:10px 0;"><span style="background:#f1f1f1; color:#333; padding:8px 12px; border-radius:12px; display:inline-block;">' + reply + '</span></div>';
-                }
-            } catch(e) {
-                var loader = document.getElementById(loadingId);
-                if(loader) loader.remove();
-                box.innerHTML += '<div style="color:red; margin:10px 0;">网络连接失败</div>';
-            }
-            box.scrollTop = box.scrollHeight;
-        };
-
-        // 启动流程
-        // 1. 立即尝试搬运
-        moveComponentsToBody();
-        startMyClock();
-
-        // 2. 页面加载完后再搬运一次 (双保险)
-        window.addEventListener('load', function() {
-            moveComponentsToBody();
-        });
+        // 双重保险启动 (防止页面没加载完找不到 body)
+        // 1. 立即执行一次
+        initWeatherBar();
+        // 2. 页面加载完毕后再执行一次
+        window.addEventListener('load', initWeatherBar);
 
     })();
 </script>
