@@ -1,48 +1,60 @@
-
-baseURL               = "https://www.hjcmgzs.xyz/"
+baseURL               = "https://www.hjcmgzs.xyz/"   # 你的新域名
 languageCode          = "zh-CN"
 title                 = "WebStack-Hugo 网址导航"
 theme                 = "WebStack-Hugo"
 preserveTaxonomyNames = true
 disablePathToLower    = true
 hasCJKLanguage        = true
-publishDir            = "public"				# 站点静态文件保存目录
-
+publishDir            = "public"
 
 [params]
     author        = "占豪杰"
     description   = "占豪杰网址导航"
+    defaultTheme  = "light"               # 【修复1】明确指定默认主题
+    nightMode     = true                  # 【修复2】必须是 true，按钮才会出来！
+    
     upload        = ""
-    about         = "https://github.com/shenweiyan/Knowledge-Garden/discussions/10"	          # 左侧导航栏的"关于导航"页面(./about)
-    repository    = "https://github.com/shenweiyan/WebStack-Hugo"  
-    enablePreLoad = true					# 网站完全打开前预加载动画
-    textPreLoad   = "Hugo 网址导航主题"				# 预加载的动画文字, 只有当enablePreLoad=true时生效
-    expandSidebar = false					# 默认展开左侧边导航栏
-    logosPath     = "assets/images/logos"			# 网站每个导航地址logo存放地址
-    defaultLogo   = "assets/images/logos/default.webp"		# logo图片资源不存在或者错误时, 默认显示的logo; 该参数如为空,将会一直加载对应的logo,直至成功
-    nightMode = true					# 默认站点为深色(夜间)模式
-    yiyan         = true                         		# 默认启用一言服务
-    fancybox      = true                                        # 使用 Fancybox 实现图片灯箱/放大功能
+    about         = "https://github.com/shenweiyan/Knowledge-Garden/discussions/10"
+    repository    = "https://github.com/shenweiyan/WebStack-Hugo"
+    
+    enablePreLoad = true
+    textPreLoad   = "Hugo 网址导航主题"
+    expandSidebar = true                  # 默认是否展开侧边栏
+    
+    # 这里保持原样，如果 Logo 裂了也建议换成网络链接
+    logosPath     = "assets/images/logos"
+    defaultLogo   = "assets/images/logos/default.webp"
+    
+    yiyan         = true
+    fancybox      = true
 
-[params.seo]    
-    baiduhmid       = 'efccc04cb44fc49faddac5876180b369'	# 百度统计 hm.src 的 ID
-    baiduSiteVer    = 'codeva-cCAOSG8MBO'			# 百度HTML标签验证(baidu-site-verification)
-    tj51laid        = ''                        		# 51.LA 网站统计
+[params.seo]
+    baiduhmid       = ''
+    baiduSiteVer    = ''
+    tj51laid        = ''
     tj51lack        = ''
-    GoogleAdsClient = ''					# Google AdSense 
+    GoogleAdsClient = ''
 
+# 天气API Key (如果不需要可以留空，因为我们已经用了 HTML 覆盖大法)
 [params.qweather]
-    key = "085791e805a24491b43b06cf58ab31e7"
+    key = ""
 
 [params.images]
-    favicon           = "https://cdn-icons-png.flaticon.com/128/2215/2215535.png"
-    searchImageL      = "assets/images/bg-dna.jpg"		# 搜索部分浅色背景图
-    searchImageD      = "assets/images/bg-dna.jpg"		# 搜索部分深色背景图
-    logoExpandLight   = "https://cdn-icons-png.flaticon.com/512/2985/2985150.png"
-    logoExpandDark    = "https://cdn-icons-png.flaticon.com/512/2985/2985150.png"
-    logoCollapseLight = "https://cdn-icons-png.flaticon.com/128/2215/2215535.png"
-    logoCollapseDark  = "https://cdn-icons-png.flaticon.com/128/2215/2215535.png"
+    # 【修复3】侧边栏按钮全部换成网络图标，防止因找不到本地图片而“消失”
+    # 这是一个向右的小箭头
+    logoExpandLight   = "https://cdn-icons-png.flaticon.com/512/271/271228.png"
+    logoExpandDark    = "https://cdn-icons-png.flaticon.com/512/271/271228.png"
     
+    # 这是一个向左的小箭头
+    logoCollapseLight = "https://cdn-icons-png.flaticon.com/512/271/271220.png"
+    logoCollapseDark  = "https://cdn-icons-png.flaticon.com/512/271/271220.png"
+    
+    # 你的网站图标
+    favicon           = "https://cdn-icons-png.flaticon.com/128/2215/2215535.png"
+    
+    # 搜索背景图
+    searchImageL      = "assets/images/bg-dna.jpg"
+    searchImageD      = "assets/images/bg-dna.jpg"
+
 [markup.goldmark.renderer]
     unsafe = true
-
