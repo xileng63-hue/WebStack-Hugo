@@ -12,6 +12,8 @@ publishDir            = "public"				# 站点静态文件保存目录
 [params]
     author        = "占豪杰"
     description   = "占豪杰网址导航"
+    defaultTheme  = "light"               # 【新增】明确指定默认是亮色模式
+    nightMode     = true                  # 【修改】开启夜间模式支持(设为true按钮才好使)
     upload        = ""
     about         = "https://github.com/shenweiyan/Knowledge-Garden/discussions/10"	          # 左侧导航栏的"关于导航"页面(./about)
     repository    = "https://github.com/shenweiyan/WebStack-Hugo"  
