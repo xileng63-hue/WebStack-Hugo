@@ -13,7 +13,6 @@ publishDir            = "public"				# 站点静态文件保存目录
     author        = "占豪杰"
     description   = "占豪杰网址导航"
     defaultTheme  = "light"               # 【新增】明确指定默认是亮色模式
-    nightMode     = true                  # 【修改】开启夜间模式支持(设为true按钮才好使)
     upload        = ""
     about         = "https://github.com/shenweiyan/Knowledge-Garden/discussions/10"	          # 左侧导航栏的"关于导航"页面(./about)
     repository    = "https://github.com/shenweiyan/WebStack-Hugo"  
@@ -22,6 +21,7 @@ publishDir            = "public"				# 站点静态文件保存目录
     expandSidebar = false					# 默认展开左侧边导航栏
     logosPath     = "assets/images/logos"			# 网站每个导航地址logo存放地址
     defaultLogo   = "assets/images/logos/default.webp"		# logo图片资源不存在或者错误时, 默认显示的logo; 该参数如为空,将会一直加载对应的logo,直至成功
+    nightMode     = true					# 默认站点为深色(夜
     yiyan         = true                         		# 默认启用一言服务
     fancybox      = true                                        # 使用 Fancybox 实现图片灯箱/放大功能
 
