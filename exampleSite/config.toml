@@ -10,8 +10,8 @@ publishDir            = "public"
 [params]
     author        = "占豪杰"
     description   = "占豪杰网址导航"
-    defaultTheme  = "light"               # 【修复1】明确指定默认主题
-    nightMode     = true                  # 【修复2】必须是 true，按钮才会出来！
+    defaultTheme  = "light"               
+    nightMode     = true                  # 必须开启
     
     upload        = ""
     about         = "https://github.com/shenweiyan/Knowledge-Garden/discussions/10"
@@ -19,9 +19,8 @@ publishDir            = "public"
     
     enablePreLoad = true
     textPreLoad   = "Hugo 网址导航主题"
-    expandSidebar = true                  # 默认是否展开侧边栏
+    expandSidebar = true                  
     
-    # 这里保持原样，如果 Logo 裂了也建议换成网络链接
     logosPath     = "assets/images/logos"
     defaultLogo   = "assets/images/logos/default.webp"
     
@@ -35,19 +34,21 @@ publishDir            = "public"
     tj51lack        = ''
     GoogleAdsClient = ''
 
-# 天气API Key (如果不需要可以留空，因为我们已经用了 HTML 覆盖大法)
+# 天气API Key (留空即可)
 [params.qweather]
     key = ""
 
 [params.images]
-    # 【修复3】侧边栏按钮全部换成网络图标，防止因找不到本地图片而“消失”
-    # 这是一个向右的小箭头
-    logoExpandLight   = "https://cdn-icons-png.flaticon.com/512/271/271228.png"
-    logoExpandDark    = "https://cdn-icons-png.flaticon.com/512/271/271228.png"
+    # 【终极修复】使用 Base64 编码的 SVG 图标
+    # 这种写法不需要网络加载，图片直接嵌入代码，绝对不会裂图！
     
-    # 这是一个向左的小箭头
-    logoCollapseLight = "https://cdn-icons-png.flaticon.com/512/271/271220.png"
-    logoCollapseDark  = "https://cdn-icons-png.flaticon.com/512/271/271220.png"
+    # 展开图标 (向右箭头)
+    logoExpandLight   = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiM1NTUiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cG9seWxpbmUgcG9pbnRzPSI5IDE4IDE1IDEyIDkgNiI+PC9wb2x5bGluZT48L3N2Zz4="
+    logoExpandDark    = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNmZmYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cG9seWxpbmUgcG9pbnRzPSI5IDE4IDE1IDEyIDkgNiI+PC9wb2x5bGluZT48L3N2Zz4="
+    
+    # 收起图标 (向左箭头)
+    logoCollapseLight = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiM1NTUiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cG9seWxpbmUgcG9pbnRzPSIxNSAxOCA5IDEyIDE1IDYiPjwvcG9seWxpbmU+PC9zdmc+"
+    logoCollapseDark  = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNmZmYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cG9seWxpbmUgcG9pbnRzPSIxNSAxOCA5IDEyIDE1IDYiPjwvcG9seWxpbmU+PC9zdmc+"
     
     # 你的网站图标
     favicon           = "https://cdn-icons-png.flaticon.com/128/2215/2215535.png"
