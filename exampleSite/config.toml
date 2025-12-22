@@ -1,4 +1,3 @@
-
 baseURL               = "https://www.hjcmgzs.xyz/"
 languageCode          = "zh-CN"
 title                 = "WebStack-Hugo 网址导航"
@@ -12,9 +11,9 @@ publishDir            = "public"				# 站点静态文件保存目录
 [params]
     author        = "占豪杰"
     description   = "占豪杰网址导航"
-    upload        = ""
-    about         = "https://github.com/shenweiyan/Knowledge-Garden/discussions/10"	          # 左侧导航栏的"关于导航"页面(./about)
-    repository    = "https://github.com/shenweiyan/WebStack-Hugo"  
+    upload        = "https://www.hjcmgzs.xyz/"
+    about         = "https://www.hjcmgzs.xyz/"	          # 左侧导航栏的"关于导航"页面(./about)
+    repository    = "https://www.hjcmgzs.xyz/"  
     enablePreLoad = true					# 网站完全打开前预加载动画
     textPreLoad   = "Hugo 网址导航主题"				# 预加载的动画文字, 只有当enablePreLoad=true时生效
     expandSidebar = false					# 默认展开左侧边导航栏
@@ -22,7 +21,6 @@ publishDir            = "public"				# 站点静态文件保存目录
     defaultLogo   = "assets/images/logos/default.webp"		# logo图片资源不存在或者错误时, 默认显示的logo; 该参数如为空,将会一直加载对应的logo,直至成功
     nightMode     = false					# 默认站点为深色(夜间)模式
     yiyan         = true                         		# 默认启用一言服务
-    fancybox      = true                                        # 使用 Fancybox 实现图片灯箱/放大功能
 
 [params.seo]    
     baiduhmid       = 'efccc04cb44fc49faddac5876180b369'	# 百度统计 hm.src 的 ID
@@ -35,13 +33,13 @@ publishDir            = "public"				# 站点静态文件保存目录
     key = "085791e805a24491b43b06cf58ab31e7"
 
 [params.images]
-    favicon           = "https://cdn-icons-png.flaticon.com/128/2215/2215535.png"
+    favicon           = "assets/images/favicon.png"
     searchImageL      = "assets/images/bg-dna.jpg"		# 搜索部分浅色背景图
     searchImageD      = "assets/images/bg-dna.jpg"		# 搜索部分深色背景图
-    logoExpandLight   = "https://cdn-icons-png.flaticon.com/512/2985/2985150.png"
-    logoExpandDark    = "https://cdn-icons-png.flaticon.com/512/2985/2985150.png"
-    logoCollapseLight = "https://cdn-icons-png.flaticon.com/128/2215/2215535.png"
-    logoCollapseDark  = "https://cdn-icons-png.flaticon.com/128/2215/2215535.png"
+    logoExpandLight   = "assets/images/bt8-expand-light.png"
+    logoExpandDark    = "assets/images/bt8-expand-dark.png"
+    logoCollapseLight = "assets/images/bt.png"
+    logoCollapseDark  = "assets/images/bt.png"
     
 [markup.goldmark.renderer]
     unsafe = true
