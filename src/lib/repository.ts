@@ -1,30 +1,56 @@
 import { seedData } from '../data/seed'
-import type { Category, NavigationData, NavLink, SiteSettings } from '../types'
-import { withDefaultGroups } from './categoryGroups'
+import type {
+  Category,
+  CategoryGroup,
+  NavigationData,
+  NavigationDeleteSet,
+  NavLink,
+  SiteSettings,
+} from '../types'
+import { normalizeLegacyCategory } from './categoryGroups'
 import { isSupabaseConfigured, supabase } from './supabase'
 
-const STORAGE_KEY = 'hjcm-navigation-data-v1'
+const STORAGE_KEY = 'hjcm-navigation-data-v2'
+const LEGACY_STORAGE_KEY = 'hjcm-navigation-data-v1'
 
-const cloneSeed = (): NavigationData => JSON.parse(JSON.stringify(seedData)) as NavigationData
+const clone = <T,>(value: T): T => JSON.parse(JSON.stringify(value)) as T
+const cloneSeed = (): NavigationData => clone(seedData)
+
+const normalizeData = (value: Partial<NavigationData> & { categories?: Array<Category & { emoji?: string }> }): NavigationData => {
+  const groups = value.groups?.length ? value.groups : seedData.groups
+  return {
+    groups: groups.map((group) => ({ ...group, is_pinned: group.is_pinned ?? false })),
+    categories: (value.categories ?? []).map((category) => normalizeLegacyCategory(category, groups)),
+    links: (value.links ?? []).map((link) => ({
+      ...link,
+      is_pinned: link.is_pinned ?? false,
+      health_status: link.health_status ?? 'unchecked',
+      http_status: link.http_status ?? null,
+      last_checked_at: link.last_checked_at ?? null,
+      final_url: link.final_url ?? '',
+      health_error: link.health_error ?? '',
+    })),
+    settings: value.settings ?? seedData.settings,
+  }
+}
 
 const readLocal = (): NavigationData => {
   try {
-    const stored = localStorage.getItem(STORAGE_KEY)
+    const stored = localStorage.getItem(STORAGE_KEY) ?? localStorage.getItem(LEGACY_STORAGE_KEY)
     if (stored) {
-      const parsed = JSON.parse(stored) as NavigationData
-      return { ...parsed, categories: withDefaultGroups(parsed.categories) }
+      const normalized = normalizeData(JSON.parse(stored) as NavigationData)
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(normalized))
+      return normalized
     }
   } catch {
-    // A clean seed is safer than blocking the public page on malformed local data.
+    // Fall back to a clean seed instead of blocking the public page.
   }
   const initial = cloneSeed()
   localStorage.setItem(STORAGE_KEY, JSON.stringify(initial))
   return initial
 }
 
-const writeLocal = (data: NavigationData) => {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
-}
+const writeLocal = (data: NavigationData) => localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
 
 export const repository = {
   mode: isSupabaseConfigured ? ('cloud' as const) : ('local' as const),
@@ -32,98 +58,49 @@ export const repository = {
   async load(): Promise<NavigationData> {
     if (!supabase) return readLocal()
 
-    const [categoriesResult, linksResult, settingsResult] = await Promise.all([
-      supabase.from('categories').select('*').order('order_index'),
-      supabase.from('links').select('*').order('order_index'),
+    const [groupsResult, categoriesResult, linksResult, settingsResult] = await Promise.all([
+      supabase.from('category_groups').select('*').order('is_pinned', { ascending: false }).order('order_index'),
+      supabase.from('categories').select('*').order('is_pinned', { ascending: false }).order('order_index'),
+      supabase.from('links').select('*').order('is_pinned', { ascending: false }).order('order_index'),
       supabase.from('site_settings').select('*').eq('id', 'main').maybeSingle(),
     ])
 
-    const error = categoriesResult.error || linksResult.error || settingsResult.error
+    const error = groupsResult.error || categoriesResult.error || linksResult.error || settingsResult.error
     if (error) throw error
 
-    return {
-      categories: withDefaultGroups((categoriesResult.data ?? []) as Category[]),
+    return normalizeData({
+      groups: (groupsResult.data ?? []) as CategoryGroup[],
+      categories: (categoriesResult.data ?? []) as Category[],
       links: (linksResult.data ?? []) as NavLink[],
       settings: (settingsResult.data ?? seedData.settings) as SiteSettings,
-    }
-  },
-
-  async saveCategory(category: Category, current: NavigationData) {
-    if (supabase) {
-      const { error } = await supabase.from('categories').upsert(category)
-      if (error) throw error
-      return
-    }
-    writeLocal({ ...current, categories: current.categories.some((item) => item.id === category.id)
-      ? current.categories.map((item) => item.id === category.id ? category : item)
-      : [...current.categories, category] })
-  },
-
-  async deleteCategory(id: string, current: NavigationData) {
-    if (supabase) {
-      const { error } = await supabase.from('categories').delete().eq('id', id)
-      if (error) throw error
-      return
-    }
-    writeLocal({
-      ...current,
-      categories: current.categories.filter((item) => item.id !== id),
-      links: current.links.filter((item) => item.category_id !== id),
     })
   },
 
-  async saveLink(link: NavLink, current: NavigationData) {
-    if (supabase) {
-      const { error } = await supabase.from('links').upsert(link)
-      if (error) throw error
+  async saveBatch(data: NavigationData, deleted: NavigationDeleteSet) {
+    if (!supabase) {
+      writeLocal(data)
       return
     }
-    writeLocal({ ...current, links: current.links.some((item) => item.id === link.id)
-      ? current.links.map((item) => item.id === link.id ? link : item)
-      : [...current.links, link] })
-  },
 
-  async deleteLink(id: string, current: NavigationData) {
-    if (supabase) {
-      const { error } = await supabase.from('links').delete().eq('id', id)
-      if (error) throw error
-      return
-    }
-    writeLocal({ ...current, links: current.links.filter((item) => item.id !== id) })
-  },
-
-  async saveSettings(settings: SiteSettings, current: NavigationData) {
-    if (supabase) {
-      const { error } = await supabase.from('site_settings').upsert(settings)
-      if (error) throw error
-      return
-    }
-    writeLocal({ ...current, settings })
-  },
-
-  async saveOrder(categories: Category[], links: NavLink[], current: NavigationData) {
-    if (supabase) {
-      const [categoryResult, linkResult] = await Promise.all([
-        categories.length ? supabase.from('categories').upsert(categories) : Promise.resolve({ error: null }),
-        links.length ? supabase.from('links').upsert(links) : Promise.resolve({ error: null }),
-      ])
-      if (categoryResult.error || linkResult.error) throw categoryResult.error || linkResult.error
-      return
-    }
-    writeLocal({ ...current, categories, links })
+    const { error } = await supabase.rpc('save_navigation_batch', {
+      payload: {
+        groups: data.groups,
+        categories: data.categories,
+        links: data.links,
+        settings: data.settings,
+        deleted,
+      },
+    })
+    if (error) throw error
   },
 
   async importData(data: NavigationData) {
-    if (supabase) {
-      const categoryResult = await supabase.from('categories').upsert(data.categories)
-      if (categoryResult.error) throw categoryResult.error
-      const linkResult = await supabase.from('links').upsert(data.links)
-      if (linkResult.error) throw linkResult.error
-      const settingsResult = await supabase.from('site_settings').upsert(data.settings)
-      if (settingsResult.error) throw settingsResult.error
+    const normalized = normalizeData(data)
+    if (!supabase) {
+      writeLocal(normalized)
       return
     }
-    writeLocal(data)
+    await this.saveBatch(normalized, { groupIds: [], categoryIds: [], linkIds: [] })
   },
 
   resetLocal(): NavigationData {

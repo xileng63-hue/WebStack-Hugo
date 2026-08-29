@@ -1,10 +1,21 @@
+export type CategoryGroup = {
+  id: string
+  name: string
+  order_index: number
+  is_visible: boolean
+  is_pinned: boolean
+}
+
 export type Category = {
   id: string
   name: string
-  emoji: string
+  group_id: string
   order_index: number
   is_visible: boolean
+  is_pinned: boolean
 }
+
+export type LinkHealthStatus = 'unchecked' | 'healthy' | 'redirected' | 'broken'
 
 export type NavLink = {
   id: string
@@ -18,6 +29,12 @@ export type NavLink = {
   order_index: number
   is_visible: boolean
   is_featured: boolean
+  is_pinned: boolean
+  health_status: LinkHealthStatus
+  http_status: number | null
+  last_checked_at: string | null
+  final_url: string
+  health_error: string
 }
 
 export type SiteSettings = {
@@ -31,8 +48,14 @@ export type SiteSettings = {
 }
 
 export type NavigationData = {
+  groups: CategoryGroup[]
   categories: Category[]
   links: NavLink[]
   settings: SiteSettings
 }
 
+export type NavigationDeleteSet = {
+  groupIds: string[]
+  categoryIds: string[]
+  linkIds: string[]
+}

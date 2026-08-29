@@ -1,5 +1,6 @@
 -- HJCM Navigation / Supabase schema
 -- Run this file once in Supabase Dashboard -> SQL Editor.
+-- Existing installations must then run migrations/202608300001_normalize_navigation.sql.
 
 create table if not exists public.categories (
   id text primary key,

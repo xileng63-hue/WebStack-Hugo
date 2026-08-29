@@ -10,7 +10,6 @@ import {
   Sun,
   X,
 } from 'lucide-react'
-import { getCategoryGroupId, getChildCategories, getNavigationGroups } from '../lib/categoryGroups'
 import type { NavigationData } from '../types'
 
 type Props = {
@@ -33,23 +32,23 @@ export function PublicSite({ data, onOpenAdmin }: Props) {
   const [menuOpen, setMenuOpen] = useState(false)
   const [theme, setTheme] = useState<Theme>(getInitialTheme)
 
-  const allGroups = useMemo(
-    () => getNavigationGroups(data.categories, true),
-    [data.categories],
+  const groups = useMemo(
+    () => data.groups.filter((group) => group.is_visible).sort((a, b) => Number(b.is_pinned) - Number(a.is_pinned) || a.order_index - b.order_index),
+    [data.groups],
   )
-
-  const groups = useMemo(() => allGroups.filter((group) => group.is_visible), [allGroups])
 
   const categories = useMemo(
     () => {
       const visibleGroupIds = new Set(groups.map((group) => group.id))
-      return getChildCategories(data.categories).filter((category) => visibleGroupIds.has(getCategoryGroupId(category, allGroups)))
+      return data.categories
+        .filter((category) => category.is_visible && visibleGroupIds.has(category.group_id))
+        .sort((a, b) => Number(b.is_pinned) - Number(a.is_pinned) || a.order_index - b.order_index)
     },
-    [allGroups, data.categories, groups],
+    [data.categories, groups],
   )
 
   const links = useMemo(
-    () => data.links.filter((item) => item.is_visible).sort((a, b) => a.order_index - b.order_index),
+    () => data.links.filter((item) => item.is_visible).sort((a, b) => Number(b.is_pinned) - Number(a.is_pinned) || a.order_index - b.order_index),
     [data.links],
   )
 
@@ -57,14 +56,14 @@ export function PublicSite({ data, onOpenAdmin }: Props) {
 
   const groupSummaries = useMemo(
     () => groups.map((group) => {
-      const groupCategoryIds = new Set(categories.filter((category) => getCategoryGroupId(category, allGroups) === group.id).map((category) => category.id))
+      const groupCategoryIds = new Set(categories.filter((category) => category.group_id === group.id).map((category) => category.id))
       return {
         ...group,
         categories: categories.filter((category) => groupCategoryIds.has(category.id)),
         linkCount: links.filter((link) => groupCategoryIds.has(link.category_id)).length,
       }
     }),
-    [allGroups, categories, groups, links],
+    [categories, groups, links],
   )
 
   const resolvedActiveGroupId = groupSummaries.some((group) => group.id === activeGroupId)

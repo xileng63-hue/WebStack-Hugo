@@ -1,8 +1,8 @@
-import type { Category } from '../types'
+import type { Category, CategoryGroup } from '../types'
 
 export const GROUP_MARKER = '__navigation_group__'
 
-export type NavigationGroup = Pick<Category, 'id' | 'name' | 'order_index' | 'is_visible'>
+export type NavigationGroup = Pick<CategoryGroup, 'id' | 'name' | 'order_index' | 'is_visible'>
 
 export const DEFAULT_GROUPS: NavigationGroup[] = [
   { id: 'nav-group-post', name: '后期', order_index: 0, is_visible: true },
@@ -39,40 +39,14 @@ const legacyGroupMap: Record<string, string> = {
   视频教程: 'nav-group-post',
 }
 
-export const isGroupRecord = (category: Category) => category.emoji === GROUP_MARKER
-
-export const groupToCategory = (group: NavigationGroup): Category => ({
-  ...group,
-  emoji: GROUP_MARKER,
+export const normalizeLegacyCategory = (category: Category & { emoji?: string }, groups: CategoryGroup[]): Category => ({
+  id: category.id,
+  name: category.name,
+  group_id: category.group_id
+    || groups.find((group) => group.id === category.emoji || group.name === category.emoji)?.id
+    || legacyGroupMap[category.name]
+    || 'nav-group-other',
+  order_index: category.order_index,
+  is_visible: category.is_visible,
+  is_pinned: category.is_pinned ?? false,
 })
-
-export const withDefaultGroups = (categories: Category[]): Category[] => {
-  const persistedGroups = categories.filter(isGroupRecord)
-  const persistedMap = new Map(persistedGroups.map((group) => [group.id, group]))
-  const defaults = DEFAULT_GROUPS.map((group) => persistedMap.get(group.id) ?? groupToCategory(group))
-  const customGroups = persistedGroups.filter((group) => !DEFAULT_GROUPS.some((item) => item.id === group.id))
-  return [...categories.filter((category) => !isGroupRecord(category)), ...defaults, ...customGroups]
-}
-
-export const getNavigationGroups = (categories: Category[], includeHidden = false): NavigationGroup[] =>
-  withDefaultGroups(categories)
-    .filter((category) => isGroupRecord(category) && (includeHidden || category.is_visible))
-    .sort((a, b) => a.order_index - b.order_index)
-    .map(({ id, name, order_index, is_visible }) => ({ id, name, order_index, is_visible }))
-
-export const getChildCategories = (categories: Category[], includeHidden = false): Category[] =>
-  categories
-    .filter((category) => !isGroupRecord(category) && (includeHidden || category.is_visible))
-    .sort((a, b) => a.order_index - b.order_index)
-
-export const getCategoryGroupId = (category: Category, groups: NavigationGroup[]): string => {
-  if (groups.some((group) => group.id === category.emoji)) return category.emoji
-  const nameMatch = groups.find((group) => group.name === category.emoji)
-  if (nameMatch) return nameMatch.id
-  return legacyGroupMap[category.name] ?? groups.find((group) => group.id === 'nav-group-other')?.id ?? groups[0]?.id ?? ''
-}
-
-export const getCategoryGroup = (category: Category, categories: Category[]): NavigationGroup | undefined => {
-  const groups = getNavigationGroups(categories, true)
-  return groups.find((group) => group.id === getCategoryGroupId(category, groups))
-}

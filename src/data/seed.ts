@@ -1,5 +1,5 @@
-import type { Category, NavLink, NavigationData } from '../types'
-import { DEFAULT_GROUPS, groupToCategory } from '../lib/categoryGroups'
+import type { Category, CategoryGroup, NavLink, NavigationData } from '../types'
+import { DEFAULT_GROUPS } from '../lib/categoryGroups'
 
 type RawCategory = {
   name: string
@@ -247,10 +247,13 @@ const accents = ['#6d5dfc', '#ff8f70', '#2bb3a3', '#ef6ca9', '#4d8df7', '#f2b84b
 const categories: Category[] = rawCategories.map((category, index) => ({
   id: `category-${index + 1}`,
   name: category.name,
-  emoji: category.emoji,
+  group_id: DEFAULT_GROUPS.find((group) => group.name === category.emoji)?.id ?? 'nav-group-other',
   order_index: index,
   is_visible: true,
+  is_pinned: false,
 }))
+
+const groups: CategoryGroup[] = DEFAULT_GROUPS.map((group) => ({ ...group, is_pinned: false }))
 
 const links: NavLink[] = rawCategories.flatMap((category, categoryIndex) =>
   category.links.map(([name, url, description], linkIndex) => ({
@@ -265,11 +268,18 @@ const links: NavLink[] = rawCategories.flatMap((category, categoryIndex) =>
     order_index: linkIndex,
     is_visible: true,
     is_featured: categoryIndex === 0 && linkIndex < 4,
+    is_pinned: false,
+    health_status: 'unchecked',
+    http_status: null,
+    last_checked_at: null,
+    final_url: '',
+    health_error: '',
   })),
 )
 
 export const seedData: NavigationData = {
-  categories: [...categories, ...DEFAULT_GROUPS.map(groupToCategory)],
+  groups,
+  categories,
   links,
   settings: {
     id: 'main',
