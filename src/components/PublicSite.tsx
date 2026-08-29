@@ -159,7 +159,7 @@ export function PublicSite({ data, onOpenAdmin }: Props) {
 
       <div className="mobile-category-bar">
         <button type="button" onClick={() => setMenuOpen(!menuOpen)}>
-          <LayoutGrid size={15} /> 大分类
+          <LayoutGrid size={15} /> 分类
         </button>
         <span>{activeGroup}</span>
       </div>
@@ -174,7 +174,6 @@ export function PublicSite({ data, onOpenAdmin }: Props) {
 
       <main className="directory-layout">
         <aside className="category-sidebar">
-          <div className="sidebar-label">大分类</div>
           {groupSummaries.map((group) => (
             <button type="button" key={group.name} className={activeGroup === group.name ? 'active' : ''} onClick={() => selectGroup(group.name)}>
               <span>{group.name}</span><small>{group.linkCount}</small>
@@ -184,12 +183,7 @@ export function PublicSite({ data, onOpenAdmin }: Props) {
 
         <div className="directory-content" id="content-start">
           <section className="directory-intro">
-            <span className="eyebrow"><Sparkles size={14} /> {data.settings.announcement}</span>
-            <div className="intro-copy">
-              <div>
-                <h1>{activeGroup}</h1>
-                <p>{data.settings.subtitle}</p>
-              </div>
+            <div className="top-search-row">
               <label className="search-box" htmlFor="site-search">
                 <Search size={18} />
                 <input
@@ -203,6 +197,14 @@ export function PublicSite({ data, onOpenAdmin }: Props) {
                   <button type="button" onClick={() => setQuery('')} aria-label="清除搜索"><X size={16} /></button>
                 ) : <kbd>⌘ K</kbd>}
               </label>
+            </div>
+
+            <div className="intro-copy">
+              <div>
+                <span className="eyebrow"><Sparkles size={14} /> {data.settings.announcement}</span>
+                <h1>{activeGroup}</h1>
+                <p>{data.settings.subtitle}</p>
+              </div>
             </div>
 
             {!normalizedQuery && (
