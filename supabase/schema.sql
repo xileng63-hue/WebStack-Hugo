@@ -42,17 +42,23 @@ alter table public.categories enable row level security;
 alter table public.links enable row level security;
 alter table public.site_settings enable row level security;
 
--- Public visitors may only read content that the front-end chooses to display.
-create policy "public read categories" on public.categories for select using (true);
-create policy "public read links" on public.links for select using (true);
-create policy "public read settings" on public.site_settings for select using (true);
+-- Public visitors may only read records explicitly marked as visible.
+-- Authenticated administrators can still read hidden records in the editor.
+drop policy if exists "public read categories" on public.categories;
+drop policy if exists "public read links" on public.links;
+drop policy if exists "public read settings" on public.site_settings;
+create policy "public read categories" on public.categories for select to anon using (is_visible = true);
+create policy "public read links" on public.links for select to anon using (is_visible = true);
+create policy "public read settings" on public.site_settings for select to anon using (true);
 
 -- Only authenticated Supabase users can create, change, or delete content.
 -- Keep public sign-up disabled in Supabase Auth and create the administrator manually.
+drop policy if exists "admin manage categories" on public.categories;
+drop policy if exists "admin manage links" on public.links;
+drop policy if exists "admin manage settings" on public.site_settings;
 create policy "admin manage categories" on public.categories for all to authenticated using (true) with check (true);
 create policy "admin manage links" on public.links for all to authenticated using (true) with check (true);
 create policy "admin manage settings" on public.site_settings for all to authenticated using (true) with check (true);
 
 create index if not exists categories_order_idx on public.categories(order_index);
 create index if not exists links_category_order_idx on public.links(category_id, order_index);
-
