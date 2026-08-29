@@ -1,8 +1,6 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   ArrowUpRight,
-  ChevronRight,
-  Command,
   LayoutGrid,
   Menu,
   Search,
@@ -10,27 +8,11 @@ import {
   Sparkles,
   X,
 } from 'lucide-react'
-import type { NavigationData, NavLink } from '../types'
+import type { NavigationData } from '../types'
 
 type Props = {
   data: NavigationData
   onOpenAdmin: () => void
-}
-
-const initials = (name: string) => name.trim().slice(0, 2).toUpperCase()
-
-function LinkIcon({ link }: { link: NavLink }) {
-  const [failed, setFailed] = useState(false)
-
-  if (link.icon_url && !failed) {
-    return <img src={link.icon_url} alt="" onError={() => setFailed(true)} />
-  }
-
-  return (
-    <span className="letter-icon" style={{ background: `${link.accent}18`, color: link.accent }}>
-      {initials(link.name)}
-    </span>
-  )
 }
 
 export function PublicSite({ data, onOpenAdmin }: Props) {
@@ -48,11 +30,16 @@ export function PublicSite({ data, onOpenAdmin }: Props) {
     [data.links],
   )
 
-  const featured = links.filter((item) => item.is_featured).slice(0, 4)
-  const normalizedQuery = query.trim().toLocaleLowerCase()
+  const categoryCounts = useMemo(
+    () => new Map(categories.map((category) => [
+      category.id,
+      links.filter((link) => link.category_id === category.id).length,
+    ])),
+    [categories, links],
+  )
 
+  const normalizedQuery = query.trim().toLocaleLowerCase()
   const filteredGroups = categories
-    .filter((category) => activeCategory === 'all' || category.id === activeCategory)
     .map((category) => ({
       category,
       links: links.filter((link) => {
@@ -66,125 +53,163 @@ export function PublicSite({ data, onOpenAdmin }: Props) {
     }))
     .filter((group) => group.links.length > 0)
 
+  useEffect(() => {
+    if (normalizedQuery) return
+
+    const sections = categories
+      .map((category) => document.getElementById(`section-${category.id}`))
+      .filter((section): section is HTMLElement => Boolean(section))
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)[0]
+        if (visible) setActiveCategory(visible.target.id.replace('section-', ''))
+      },
+      { rootMargin: '-88px 0px -70% 0px', threshold: 0 },
+    )
+
+    sections.forEach((section) => observer.observe(section))
+    return () => observer.disconnect()
+  }, [categories, normalizedQuery])
+
+  useEffect(() => {
+    const focusSearch = (event: KeyboardEvent) => {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault()
+        document.getElementById('site-search')?.focus()
+      }
+    }
+    window.addEventListener('keydown', focusSearch)
+    return () => window.removeEventListener('keydown', focusSearch)
+  }, [])
+
   const selectCategory = (id: string) => {
     setActiveCategory(id)
     setMenuOpen(false)
-    if (id !== 'all') {
-      requestAnimationFrame(() => document.getElementById(`section-${id}`)?.scrollIntoView({ behavior: 'smooth' }))
-    }
+    const target = id === 'all' ? document.getElementById('directory-top') : document.getElementById(`section-${id}`)
+    target?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
   return (
     <div className="site-shell" style={{ '--brand': data.settings.accent } as React.CSSProperties}>
       <header className="topbar">
-        <a className="brand" href="#top" aria-label="返回顶部">
+        <a className="brand" href="#directory-top" aria-label="返回顶部">
           <span className="brand-mark">{data.settings.logo_text}</span>
           <span className="brand-copy">
             <strong>{data.settings.title}</strong>
-            <small>CURATED DIRECTORY</small>
+            <small>{categories.length} 个分类 · {links.length} 个站点</small>
           </span>
         </a>
 
         <nav className="top-actions" aria-label="页面操作">
-          <span className="shortcut"><Command size={14} /> K 快速搜索</span>
           <button className="ghost-button" onClick={onOpenAdmin} type="button">
-            <Settings2 size={17} /> 管理后台
+            <Settings2 size={16} /> 管理后台
           </button>
-          <button className="mobile-menu" onClick={() => setMenuOpen(!menuOpen)} type="button" aria-label="打开分类">
+          <button
+            className="mobile-menu"
+            onClick={() => setMenuOpen(!menuOpen)}
+            type="button"
+            aria-label={menuOpen ? '关闭分类菜单' : '打开分类菜单'}
+          >
             {menuOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
         </nav>
       </header>
 
-      <main id="top">
-        <section className="hero-section">
-          <div className="hero-orbit orbit-one" />
-          <div className="hero-orbit orbit-two" />
-          <div className="hero-copy">
-            <span className="eyebrow"><Sparkles size={15} /> {data.settings.announcement}</span>
-            <h1>去你想去的地方，<br /><em>快一点。</em></h1>
-            <p>{data.settings.subtitle}</p>
-            <label className="search-box">
-              <Search size={21} />
-              <input
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                placeholder="搜索网站、工具或关键词…"
-                aria-label="搜索导航内容"
-              />
-              {query && <button type="button" onClick={() => setQuery('')}><X size={17} /></button>}
-              <kbd>⌘ K</kbd>
-            </label>
-            <div className="hero-meta">
-              <span><b>{categories.length}</b> 个分类</span>
-              <span><b>{links.length}</b> 个精选站点</span>
-              <span>持续整理中</span>
-            </div>
-          </div>
+      <div className="mobile-category-bar">
+        <button type="button" onClick={() => setMenuOpen(!menuOpen)}>
+          <LayoutGrid size={15} /> 浏览分类
+        </button>
+        <span>{activeCategory === 'all' ? '全部分类' : categories.find((item) => item.id === activeCategory)?.name}</span>
+      </div>
 
-          <div className="featured-stack" aria-label="常用站点">
-            <div className="featured-heading"><span>今日常用</span><small>QUICK ACCESS</small></div>
-            {featured.map((link, index) => (
-              <a key={link.id} href={link.url} target="_blank" rel="noreferrer" className="featured-item">
-                <span className="featured-index">0{index + 1}</span>
-                <span className="site-icon"><LinkIcon link={link} /></span>
-                <span><strong>{link.name}</strong><small>{link.description}</small></span>
-                <ArrowUpRight size={18} />
-              </a>
-            ))}
-          </div>
-        </section>
+      <div className={`mobile-category-drawer ${menuOpen ? 'is-open' : ''}`}>
+        <button type="button" className={activeCategory === 'all' ? 'active' : ''} onClick={() => selectCategory('all')}>
+          <span>全部分类</span><small>{links.length}</small>
+        </button>
+        {categories.map((category) => (
+          <button type="button" key={category.id} className={activeCategory === category.id ? 'active' : ''} onClick={() => selectCategory(category.id)}>
+            <span>{category.emoji} {category.name}</span><small>{categoryCounts.get(category.id)}</small>
+          </button>
+        ))}
+      </div>
 
-        <div className={`mobile-category-drawer ${menuOpen ? 'is-open' : ''}`}>
-          <button type="button" className={activeCategory === 'all' ? 'active' : ''} onClick={() => selectCategory('all')}>全部分类</button>
+      <main className="directory-layout" id="directory-top">
+        <aside className="category-sidebar">
+          <div className="sidebar-label"><LayoutGrid size={14} /> 站点分类</div>
+          <button type="button" className={activeCategory === 'all' ? 'active' : ''} onClick={() => selectCategory('all')}>
+            <span className="category-symbol">全</span><span>全部分类</span><small>{links.length}</small>
+          </button>
           {categories.map((category) => (
             <button type="button" key={category.id} className={activeCategory === category.id ? 'active' : ''} onClick={() => selectCategory(category.id)}>
-              {category.emoji} {category.name}
+              <span className="category-symbol">{category.emoji}</span><span>{category.name}</span>
+              <small>{categoryCounts.get(category.id)}</small>
             </button>
           ))}
-        </div>
+        </aside>
 
-        <section className="directory-layout">
-          <aside className="category-sidebar">
-            <div className="sidebar-label"><LayoutGrid size={15} /> 资源分类</div>
-            <button type="button" className={activeCategory === 'all' ? 'active' : ''} onClick={() => selectCategory('all')}>
-              <span className="category-symbol">全</span><span>全部分类</span><small>{links.length}</small>
-            </button>
-            {categories.map((category) => (
-              <button type="button" key={category.id} className={activeCategory === category.id ? 'active' : ''} onClick={() => selectCategory(category.id)}>
-                <span className="category-symbol">{category.emoji}</span><span>{category.name}</span>
-                <small>{links.filter((link) => link.category_id === category.id).length}</small>
-              </button>
-            ))}
-          </aside>
-
-          <div className="directory-content">
-            {filteredGroups.length ? filteredGroups.map(({ category, links: groupLinks }) => (
-              <section className="link-section" id={`section-${category.id}`} key={category.id}>
-                <header className="section-heading">
-                  <div><span className="section-symbol">{category.emoji}</span><h2>{category.name}</h2><small>{groupLinks.length} SITES</small></div>
-                  <button type="button" onClick={() => selectCategory(category.id)}>只看此类 <ChevronRight size={15} /></button>
-                </header>
-                <div className="link-grid">
-                  {groupLinks.map((link) => (
-                    <a className="link-card" key={link.id} href={link.url} target="_blank" rel="noreferrer">
-                      <span className="site-icon"><LinkIcon link={link} /></span>
-                      <span className="link-copy"><strong>{link.name}</strong><small>{link.description || link.url}</small></span>
-                      <ArrowUpRight className="card-arrow" size={17} />
-                    </a>
-                  ))}
-                </div>
-              </section>
-            )) : (
-              <div className="empty-search">
-                <Search size={30} />
-                <h2>没有找到“{query}”</h2>
-                <p>换个关键词试试，或者前往管理后台添加它。</p>
-                <button type="button" onClick={() => setQuery('')}>清除搜索</button>
+        <div className="directory-content">
+          <section className="directory-intro">
+            <span className="eyebrow"><Sparkles size={14} /> {data.settings.announcement}</span>
+            <div className="intro-copy">
+              <div>
+                <h1>{data.settings.title}</h1>
+                <p>{data.settings.subtitle}</p>
               </div>
-            )}
-          </div>
-        </section>
+              <label className="search-box" htmlFor="site-search">
+                <Search size={18} />
+                <input
+                  id="site-search"
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                  placeholder="搜索网站、工具或关键词"
+                  aria-label="搜索导航内容"
+                />
+                {query ? (
+                  <button type="button" onClick={() => setQuery('')} aria-label="清除搜索"><X size={16} /></button>
+                ) : <kbd>⌘ K</kbd>}
+              </label>
+            </div>
+          </section>
+
+          {filteredGroups.length ? filteredGroups.map(({ category, links: groupLinks }) => (
+            <section className="link-section" id={`section-${category.id}`} key={category.id}>
+              <header className="section-heading">
+                <div>
+                  <i aria-hidden="true" />
+                  <h2>{category.name}</h2>
+                  <small>{groupLinks.length} 个站点</small>
+                </div>
+                <button type="button" onClick={() => selectCategory('all')}>返回顶部</button>
+              </header>
+              <div className="link-grid">
+                {groupLinks.map((link) => (
+                  <a className="link-card" key={link.id} href={link.url} target="_blank" rel="noreferrer">
+                    <span className="link-copy">
+                      <strong>{link.name}</strong>
+                      <small>{link.description || link.url}</small>
+                    </span>
+                    <ArrowUpRight className="card-arrow" size={16} />
+                    {link.tags.length > 0 && (
+                      <span className="card-tags">
+                        {link.tags.slice(0, 2).map((tag) => <em key={tag}>{tag}</em>)}
+                      </span>
+                    )}
+                  </a>
+                ))}
+              </div>
+            </section>
+          )) : (
+            <div className="empty-search">
+              <Search size={28} />
+              <h2>没有找到“{query}”</h2>
+              <p>换个关键词试试，或者前往管理后台添加它。</p>
+              <button type="button" onClick={() => setQuery('')}>清除搜索</button>
+            </div>
+          )}
+        </div>
       </main>
 
       <footer>
@@ -194,4 +219,3 @@ export function PublicSite({ data, onOpenAdmin }: Props) {
     </div>
   )
 }
-
