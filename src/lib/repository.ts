@@ -1,5 +1,6 @@
 import { seedData } from '../data/seed'
 import type { Category, NavigationData, NavLink, SiteSettings } from '../types'
+import { withDefaultGroups } from './categoryGroups'
 import { isSupabaseConfigured, supabase } from './supabase'
 
 const STORAGE_KEY = 'hjcm-navigation-data-v1'
@@ -9,7 +10,10 @@ const cloneSeed = (): NavigationData => JSON.parse(JSON.stringify(seedData)) as 
 const readLocal = (): NavigationData => {
   try {
     const stored = localStorage.getItem(STORAGE_KEY)
-    if (stored) return JSON.parse(stored) as NavigationData
+    if (stored) {
+      const parsed = JSON.parse(stored) as NavigationData
+      return { ...parsed, categories: withDefaultGroups(parsed.categories) }
+    }
   } catch {
     // A clean seed is safer than blocking the public page on malformed local data.
   }
@@ -38,7 +42,7 @@ export const repository = {
     if (error) throw error
 
     return {
-      categories: (categoriesResult.data ?? []) as Category[],
+      categories: withDefaultGroups((categoriesResult.data ?? []) as Category[]),
       links: (linksResult.data ?? []) as NavLink[],
       settings: (settingsResult.data ?? seedData.settings) as SiteSettings,
     }
@@ -128,4 +132,3 @@ export const repository = {
     return initial
   },
 }
-

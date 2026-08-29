@@ -21,7 +21,13 @@ import {
   X,
 } from 'lucide-react'
 import { seedData } from '../data/seed'
-import { CATEGORY_GROUPS, getCategoryGroup } from '../lib/categoryGroups'
+import {
+  getCategoryGroup,
+  getCategoryGroupId,
+  getChildCategories,
+  getNavigationGroups,
+  groupToCategory,
+} from '../lib/categoryGroups'
 import { repository } from '../lib/repository'
 import type { Category, NavigationData, NavLink, SiteSettings } from '../types'
 
@@ -36,10 +42,10 @@ type Props = {
   onSignOut: () => void
 }
 
-const newCategory = (order: number): Category => ({
+const newCategory = (groupId: string, order: number): Category => ({
   id: crypto.randomUUID(),
   name: '',
-  emoji: '其他',
+  emoji: groupId,
   order_index: order,
   is_visible: true,
 })
@@ -60,6 +66,7 @@ const newLink = (categoryId: string, order: number): NavLink => ({
 
 export function AdminPanel({ data, setData, cloudMode, userEmail, onClose, onSignOut }: Props) {
   const [tab, setTab] = useState<Tab>('overview')
+  const [editingGroup, setEditingGroup] = useState<Category | null>(null)
   const [editingCategory, setEditingCategory] = useState<Category | null>(null)
   const [editingLink, setEditingLink] = useState<NavLink | null>(null)
   const [linkCategory, setLinkCategory] = useState('all')
@@ -69,7 +76,8 @@ export function AdminPanel({ data, setData, cloudMode, userEmail, onClose, onSig
   const [busy, setBusy] = useState(false)
   const importRef = useRef<HTMLInputElement>(null)
 
-  const categories = [...data.categories].sort((a, b) => a.order_index - b.order_index)
+  const groups = getNavigationGroups(data.categories, true)
+  const categories = getChildCategories(data.categories, true)
   const links = [...data.links].sort((a, b) => a.order_index - b.order_index)
   const filteredLinks = links.filter((link) => {
     if (linkCategory !== 'all' && link.category_id !== linkCategory) return false
@@ -95,7 +103,7 @@ export function AdminPanel({ data, setData, cloudMode, userEmail, onClose, onSig
 
   const saveCategory = async () => {
     if (!editingCategory?.name.trim()) return setError('分类名称不能为空。')
-    const value = { ...editingCategory, name: editingCategory.name.trim(), emoji: getCategoryGroup(editingCategory) }
+    const value = { ...editingCategory, name: editingCategory.name.trim() }
     await run(async () => {
       await repository.saveCategory(value, data)
       setData((current) => ({
@@ -106,6 +114,19 @@ export function AdminPanel({ data, setData, cloudMode, userEmail, onClose, onSig
       }))
       setEditingCategory(null)
     }, '分类已保存')
+  }
+
+  const saveGroup = async () => {
+    if (!editingGroup?.name.trim()) return setError('大分类名称不能为空。')
+    const value = { ...editingGroup, name: editingGroup.name.trim() }
+    await run(async () => {
+      await repository.saveCategory(value, data)
+      setData((current) => ({
+        ...current,
+        categories: current.categories.map((item) => item.id === value.id ? value : item),
+      }))
+      setEditingGroup(null)
+    }, '大分类已保存')
   }
 
   const saveLink = async () => {
@@ -165,16 +186,40 @@ export function AdminPanel({ data, setData, cloudMode, userEmail, onClose, onSig
   }
 
   const moveCategory = (id: string, direction: -1 | 1) => {
-    const ordered = categories
+    const currentCategory = categories.find((item) => item.id === id)
+    if (!currentCategory) return
+    const groupId = getCategoryGroupId(currentCategory, groups)
+    const siblings = categories.filter((item) => getCategoryGroupId(item, groups) === groupId)
+    const index = siblings.findIndex((item) => item.id === id)
+    const target = index + direction
+    if (target < 0 || target >= siblings.length) return
+    ;[siblings[index], siblings[target]] = [siblings[target], siblings[index]]
+    const reordered = siblings.map((item, order_index) => ({ ...item, order_index }))
+    const updatedMap = new Map(reordered.map((item) => [item.id, item]))
+    void run(async () => {
+      await repository.saveOrder(reordered, [], data)
+      setData((current) => ({
+        ...current,
+        categories: current.categories.map((item) => updatedMap.get(item.id) ?? item),
+      }))
+    }, '分类顺序已更新')
+  }
+
+  const moveGroup = (id: string, direction: -1 | 1) => {
+    const ordered = groups.map((group) => groupToCategory(group))
     const index = ordered.findIndex((item) => item.id === id)
     const target = index + direction
     if (target < 0 || target >= ordered.length) return
     ;[ordered[index], ordered[target]] = [ordered[target], ordered[index]]
-    const updated = ordered.map((item, order_index) => ({ ...item, order_index }))
+    const reordered = ordered.map((item, order_index) => ({ ...item, order_index }))
+    const updatedMap = new Map(reordered.map((item) => [item.id, item]))
     void run(async () => {
-      await repository.saveOrder(updated, data.links, data)
-      setData((current) => ({ ...current, categories: updated }))
-    }, '分类顺序已更新')
+      await repository.saveOrder(reordered, [], data)
+      setData((current) => ({
+        ...current,
+        categories: current.categories.map((item) => updatedMap.get(item.id) ?? item),
+      }))
+    }, '大分类顺序已更新')
   }
 
   const moveLink = (link: NavLink, direction: -1 | 1) => {
@@ -263,7 +308,7 @@ export function AdminPanel({ data, setData, cloudMode, userEmail, onClose, onSig
           <div className="admin-page">
             <div className="metric-grid">
               <article><span>链接总数</span><strong>{links.length}</strong><small>{links.filter((item) => item.is_visible).length} 个公开显示</small></article>
-              <article><span>分类总数</span><strong>{categories.length}</strong><small>{categories.filter((item) => item.is_visible).length} 个公开显示</small></article>
+              <article><span>分类结构</span><strong>{groups.length} / {categories.length}</strong><small>大分类 / 小分类</small></article>
               <article><span>首页推荐</span><strong>{links.filter((item) => item.is_featured).length}</strong><small>最多展示前 4 个</small></article>
               <article><span>数据模式</span><strong className="metric-word">{cloudMode ? '云端' : '本地'}</strong><small>{cloudMode ? '多设备同步生效' : '适合预览与设计'}</small></article>
             </div>
@@ -272,7 +317,7 @@ export function AdminPanel({ data, setData, cloudMode, userEmail, onClose, onSig
                 <header><div><span>快速操作</span><h2>继续完善你的导航</h2></div></header>
                 <div className="quick-actions">
                   <button onClick={() => { setTab('links'); setEditingLink(newLink(categories[0]?.id || '', links.length)) }}><Plus size={18} /><span><strong>添加链接</strong><small>录入一个新网站</small></span></button>
-                  <button onClick={() => { setTab('categories'); setEditingCategory(newCategory(categories.length)) }}><FolderKanban size={18} /><span><strong>添加分类</strong><small>整理内容结构</small></span></button>
+                  <button onClick={() => { setTab('categories'); setEditingCategory(newCategory(groups[0]?.id || '', categories.length)) }}><FolderKanban size={18} /><span><strong>添加小分类</strong><small>整理内容结构</small></span></button>
                   <button onClick={() => setTab('appearance')}><Settings size={18} /><span><strong>修改文案</strong><small>调整标题与品牌色</small></span></button>
                 </div>
               </section>
@@ -287,19 +332,42 @@ export function AdminPanel({ data, setData, cloudMode, userEmail, onClose, onSig
         )}
 
         {tab === 'categories' && (
-          <div className="admin-page">
-            <div className="table-toolbar"><p>分类决定公开页面的内容结构与显示顺序。</p><button className="primary-button" onClick={() => setEditingCategory(newCategory(categories.length))}><Plus size={17} /> 新建分类</button></div>
-            <section className="data-table category-table">
-              <div className="table-head"><span>分类</span><span>链接数</span><span>状态</span><span>排序</span><span>操作</span></div>
-              {categories.map((category) => (
-                <div className="table-row" key={category.id}>
-                  <span className="category-cell"><span><strong>{category.name}</strong><small>{getCategoryGroup(category)}</small></span></span>
-                  <span>{links.filter((link) => link.category_id === category.id).length}</span>
-                  <button className={`status-pill ${category.is_visible ? 'visible' : ''}`} onClick={() => toggleCategory(category)}>{category.is_visible ? <Eye size={14} /> : <EyeOff size={14} />}{category.is_visible ? '显示' : '隐藏'}</button>
-                  <span className="order-actions"><button onClick={() => moveCategory(category.id, -1)}><ArrowUp size={15} /></button><button onClick={() => moveCategory(category.id, 1)}><ArrowDown size={15} /></button></span>
-                  <span className="row-actions"><button onClick={() => setEditingCategory({ ...category })}><Pencil size={15} /></button><button className="danger" onClick={() => deleteCategory(category)}><Trash2 size={15} /></button></span>
-                </div>
-              ))}
+          <div className="admin-page category-management">
+            <div className="table-toolbar"><p>大分类可改名和排序；小分类可改名、换组、隐藏和排序。</p><button className="primary-button" onClick={() => setEditingCategory(newCategory(groups[0]?.id || '', categories.length))}><Plus size={17} /> 新建小分类</button></div>
+
+            <section className="category-block">
+              <header><div><span>PARENT CATEGORIES</span><h2>大分类</h2></div><small>控制左侧分类栏的名称与顺序</small></header>
+              <div className="data-table category-table">
+                <div className="table-head"><span>大分类</span><span>小分类数</span><span>状态</span><span>排序</span><span>操作</span></div>
+                {groups.map((group) => {
+                  const groupRecord = groupToCategory(group)
+                  return (
+                    <div className="table-row" key={group.id}>
+                      <span className="category-cell"><span><strong>{group.name}</strong><small>左侧导航</small></span></span>
+                      <span>{categories.filter((category) => getCategoryGroupId(category, groups) === group.id).length}</span>
+                      <span className="status-pill visible"><Eye size={14} />显示</span>
+                      <span className="order-actions"><button onClick={() => moveGroup(group.id, -1)}><ArrowUp size={15} /></button><button onClick={() => moveGroup(group.id, 1)}><ArrowDown size={15} /></button></span>
+                      <span className="row-actions"><button onClick={() => setEditingGroup(groupRecord)}><Pencil size={15} /></button></span>
+                    </div>
+                  )
+                })}
+              </div>
+            </section>
+
+            <section className="category-block">
+              <header><div><span>CHILD CATEGORIES</span><h2>小分类</h2></div><small>可改名、换大分类，并在所属大分类内排序</small></header>
+              <div className="data-table category-table">
+                <div className="table-head"><span>小分类</span><span>链接数</span><span>状态</span><span>排序</span><span>操作</span></div>
+                {categories.map((category) => (
+                  <div className="table-row" key={category.id}>
+                    <span className="category-cell"><span><strong>{category.name}</strong><small>{getCategoryGroup(category, data.categories)?.name ?? '未分组'}</small></span></span>
+                    <span>{links.filter((link) => link.category_id === category.id).length}</span>
+                    <button className={`status-pill ${category.is_visible ? 'visible' : ''}`} onClick={() => toggleCategory(category)}>{category.is_visible ? <Eye size={14} /> : <EyeOff size={14} />}{category.is_visible ? '显示' : '隐藏'}</button>
+                    <span className="order-actions"><button onClick={() => moveCategory(category.id, -1)}><ArrowUp size={15} /></button><button onClick={() => moveCategory(category.id, 1)}><ArrowDown size={15} /></button></span>
+                    <span className="row-actions"><button onClick={() => setEditingCategory({ ...category, emoji: getCategoryGroupId(category, groups) })}><Pencil size={15} /></button><button className="danger" onClick={() => deleteCategory(category)}><Trash2 size={15} /></button></span>
+                  </div>
+                ))}
+              </div>
             </section>
           </div>
         )}
@@ -338,9 +406,15 @@ export function AdminPanel({ data, setData, cloudMode, userEmail, onClose, onSig
         )}
       </main>
 
+      {editingGroup && (
+        <div className="editor-backdrop" onMouseDown={(event) => event.target === event.currentTarget && setEditingGroup(null)}>
+          <section className="editor-panel"><header><div><span>PARENT CATEGORY</span><h2>编辑大分类</h2></div><button onClick={() => setEditingGroup(null)}><X /></button></header><div className="editor-fields"><label><span>大分类名称</span><input autoFocus value={editingGroup.name} onChange={(event) => setEditingGroup({ ...editingGroup, name: event.target.value })} placeholder="例如：设计" /></label></div><footer><button onClick={() => setEditingGroup(null)}>取消</button><button className="primary-button" disabled={busy} onClick={saveGroup}>保存大分类</button></footer></section>
+        </div>
+      )}
+
       {editingCategory && (
         <div className="editor-backdrop" onMouseDown={(event) => event.target === event.currentTarget && setEditingCategory(null)}>
-          <section className="editor-panel"><header><div><span>CATEGORY</span><h2>{data.categories.some((item) => item.id === editingCategory.id) ? '编辑小分类' : '新建小分类'}</h2></div><button onClick={() => setEditingCategory(null)}><X /></button></header><div className="editor-fields"><label><span>小分类名称</span><input autoFocus value={editingCategory.name} onChange={(event) => setEditingCategory({ ...editingCategory, name: event.target.value })} placeholder="例如：AI 工具" /></label><label><span>所属大分类</span><select value={getCategoryGroup(editingCategory)} onChange={(event) => setEditingCategory({ ...editingCategory, emoji: event.target.value })}>{CATEGORY_GROUPS.map((group) => <option key={group} value={group}>{group}</option>)}</select></label><label className="switch-field"><input type="checkbox" checked={editingCategory.is_visible} onChange={(event) => setEditingCategory({ ...editingCategory, is_visible: event.target.checked })} /><span>在公开页面显示此分类</span></label></div><footer><button onClick={() => setEditingCategory(null)}>取消</button><button className="primary-button" disabled={busy} onClick={saveCategory}>保存分类</button></footer></section>
+          <section className="editor-panel"><header><div><span>CHILD CATEGORY</span><h2>{data.categories.some((item) => item.id === editingCategory.id) ? '编辑小分类' : '新建小分类'}</h2></div><button onClick={() => setEditingCategory(null)}><X /></button></header><div className="editor-fields"><label><span>小分类名称</span><input autoFocus value={editingCategory.name} onChange={(event) => setEditingCategory({ ...editingCategory, name: event.target.value })} placeholder="例如：AI 工具" /></label><label><span>所属大分类</span><select value={editingCategory.emoji} onChange={(event) => setEditingCategory({ ...editingCategory, emoji: event.target.value })}>{groups.map((group) => <option key={group.id} value={group.id}>{group.name}</option>)}</select></label><label className="switch-field"><input type="checkbox" checked={editingCategory.is_visible} onChange={(event) => setEditingCategory({ ...editingCategory, is_visible: event.target.checked })} /><span>在公开页面显示此分类</span></label></div><footer><button onClick={() => setEditingCategory(null)}>取消</button><button className="primary-button" disabled={busy} onClick={saveCategory}>保存分类</button></footer></section>
         </div>
       )}
 

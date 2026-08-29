@@ -10,7 +10,7 @@ import {
   Sun,
   X,
 } from 'lucide-react'
-import { CATEGORY_GROUPS, getCategoryGroup, type CategoryGroup } from '../lib/categoryGroups'
+import { getCategoryGroupId, getChildCategories, getNavigationGroups } from '../lib/categoryGroups'
 import type { NavigationData } from '../types'
 
 type Props = {
@@ -28,14 +28,24 @@ const getInitialTheme = (): Theme => {
 
 export function PublicSite({ data, onOpenAdmin }: Props) {
   const [query, setQuery] = useState('')
-  const [activeGroup, setActiveGroup] = useState<CategoryGroup>('日常')
+  const [activeGroupId, setActiveGroupId] = useState('nav-group-daily')
   const [activeCategory, setActiveCategory] = useState('')
   const [menuOpen, setMenuOpen] = useState(false)
   const [theme, setTheme] = useState<Theme>(getInitialTheme)
 
-  const categories = useMemo(
-    () => data.categories.filter((item) => item.is_visible).sort((a, b) => a.order_index - b.order_index),
+  const allGroups = useMemo(
+    () => getNavigationGroups(data.categories, true),
     [data.categories],
+  )
+
+  const groups = useMemo(() => allGroups.filter((group) => group.is_visible), [allGroups])
+
+  const categories = useMemo(
+    () => {
+      const visibleGroupIds = new Set(groups.map((group) => group.id))
+      return getChildCategories(data.categories).filter((category) => visibleGroupIds.has(getCategoryGroupId(category, allGroups)))
+    },
+    [allGroups, data.categories, groups],
   )
 
   const links = useMemo(
@@ -46,18 +56,22 @@ export function PublicSite({ data, onOpenAdmin }: Props) {
   const normalizedQuery = query.trim().toLocaleLowerCase()
 
   const groupSummaries = useMemo(
-    () => CATEGORY_GROUPS.map((group) => {
-      const groupCategoryIds = new Set(categories.filter((category) => getCategoryGroup(category) === group).map((category) => category.id))
+    () => groups.map((group) => {
+      const groupCategoryIds = new Set(categories.filter((category) => getCategoryGroupId(category, allGroups) === group.id).map((category) => category.id))
       return {
-        name: group,
+        ...group,
         categories: categories.filter((category) => groupCategoryIds.has(category.id)),
         linkCount: links.filter((link) => groupCategoryIds.has(link.category_id)).length,
       }
     }),
-    [categories, links],
+    [allGroups, categories, groups, links],
   )
 
-  const childCategories = groupSummaries.find((group) => group.name === activeGroup)?.categories ?? []
+  const resolvedActiveGroupId = groupSummaries.some((group) => group.id === activeGroupId)
+    ? activeGroupId
+    : groupSummaries[0]?.id ?? ''
+  const activeGroup = groupSummaries.find((group) => group.id === resolvedActiveGroupId)
+  const childCategories = activeGroup?.categories ?? []
   const displayedCategories = normalizedQuery
     ? categories
     : childCategories
@@ -108,8 +122,8 @@ export function PublicSite({ data, onOpenAdmin }: Props) {
     return () => window.removeEventListener('keydown', focusSearch)
   }, [])
 
-  const selectGroup = (group: CategoryGroup) => {
-    setActiveGroup(group)
+  const selectGroup = (groupId: string) => {
+    setActiveGroupId(groupId)
     setActiveCategory('')
     setQuery('')
     setMenuOpen(false)
@@ -161,12 +175,12 @@ export function PublicSite({ data, onOpenAdmin }: Props) {
         <button type="button" onClick={() => setMenuOpen(!menuOpen)}>
           <LayoutGrid size={15} /> 分类
         </button>
-        <span>{activeGroup}</span>
+        <span>{activeGroup?.name}</span>
       </div>
 
       <div className={`mobile-category-drawer ${menuOpen ? 'is-open' : ''}`}>
         {groupSummaries.map((group) => (
-          <button type="button" key={group.name} className={activeGroup === group.name ? 'active' : ''} onClick={() => selectGroup(group.name)}>
+          <button type="button" key={group.id} className={resolvedActiveGroupId === group.id ? 'active' : ''} onClick={() => selectGroup(group.id)}>
             <span>{group.name}</span><small>{group.linkCount}</small>
           </button>
         ))}
@@ -175,7 +189,7 @@ export function PublicSite({ data, onOpenAdmin }: Props) {
       <main className="directory-layout">
         <aside className="category-sidebar">
           {groupSummaries.map((group) => (
-            <button type="button" key={group.name} className={activeGroup === group.name ? 'active' : ''} onClick={() => selectGroup(group.name)}>
+            <button type="button" key={group.id} className={resolvedActiveGroupId === group.id ? 'active' : ''} onClick={() => selectGroup(group.id)}>
               <span>{group.name}</span><small>{group.linkCount}</small>
             </button>
           ))}
@@ -202,13 +216,13 @@ export function PublicSite({ data, onOpenAdmin }: Props) {
             <div className="intro-copy">
               <div>
                 <span className="eyebrow"><Sparkles size={14} /> {data.settings.announcement}</span>
-                <h1>{activeGroup}</h1>
+                <h1>{activeGroup?.name}</h1>
                 <p>{data.settings.subtitle}</p>
               </div>
             </div>
 
             {!normalizedQuery && (
-              <nav className="subcategory-tabs" aria-label={`${activeGroup}的小分类`}>
+              <nav className="subcategory-tabs" aria-label={`${activeGroup?.name ?? ''}的小分类`}>
                 {childCategories.map((category) => (
                   <button type="button" key={category.id} className={activeCategory === category.id ? 'active' : ''} onClick={() => selectCategory(category.id)}>
                     {category.name}

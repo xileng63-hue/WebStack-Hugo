@@ -1,4 +1,5 @@
 import type { Category, NavLink, NavigationData } from '../types'
+import { DEFAULT_GROUPS, groupToCategory } from '../lib/categoryGroups'
 
 type RawCategory = {
   name: string
@@ -268,7 +269,7 @@ const links: NavLink[] = rawCategories.flatMap((category, categoryIndex) =>
 )
 
 export const seedData: NavigationData = {
-  categories,
+  categories: [...categories, ...DEFAULT_GROUPS.map(groupToCategory)],
   links,
   settings: {
     id: 'main',

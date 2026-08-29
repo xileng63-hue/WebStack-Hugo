@@ -4,8 +4,8 @@
 create table if not exists public.categories (
   id text primary key,
   name text not null,
-  -- Kept as "emoji" for backward compatibility; stores the parent category name.
-  emoji text not null default '其他',
+  -- Kept as "emoji" for backward compatibility; stores a parent group id or group marker.
+  emoji text not null default 'nav-group-other',
   order_index integer not null default 0,
   is_visible boolean not null default true,
   created_at timestamptz not null default now(),

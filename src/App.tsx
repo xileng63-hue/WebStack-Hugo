@@ -47,8 +47,23 @@ function App() {
     }
   }, [])
 
+  const enterAdmin = async () => {
+    if (!isSupabaseConfigured) return setScreen('admin')
+    setLoading(true)
+    setLoadError('')
+    try {
+      setData(await repository.load())
+      setScreen('admin')
+    } catch (error) {
+      setLoadError(error instanceof Error ? error.message : '管理员数据加载失败')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const openAdmin = () => {
-    if (!isSupabaseConfigured || session) setScreen('admin')
+    if (!isSupabaseConfigured) setScreen('admin')
+    else if (session) void enterAdmin()
     else setScreen('login')
   }
 
@@ -62,11 +77,11 @@ function App() {
   }
 
   if (screen === 'login') {
-    return <LoginScreen onBack={() => setScreen('site')} onSuccess={() => setScreen('admin')} />
+    return <LoginScreen onBack={() => setScreen('site')} onSuccess={() => { void enterAdmin() }} />
   }
 
   if (screen === 'password') {
-    return <PasswordSetupScreen session={session} onSuccess={() => setScreen('admin')} />
+    return <PasswordSetupScreen session={session} onSuccess={() => { void enterAdmin() }} />
   }
 
   if (screen === 'admin') {
