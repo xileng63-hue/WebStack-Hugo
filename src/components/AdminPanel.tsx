@@ -21,6 +21,7 @@ import {
   X,
 } from 'lucide-react'
 import { seedData } from '../data/seed'
+import { CATEGORY_GROUPS, getCategoryGroup } from '../lib/categoryGroups'
 import { repository } from '../lib/repository'
 import type { Category, NavigationData, NavLink, SiteSettings } from '../types'
 
@@ -38,7 +39,7 @@ type Props = {
 const newCategory = (order: number): Category => ({
   id: crypto.randomUUID(),
   name: '',
-  emoji: '新',
+  emoji: '其他',
   order_index: order,
   is_visible: true,
 })
@@ -94,7 +95,7 @@ export function AdminPanel({ data, setData, cloudMode, userEmail, onClose, onSig
 
   const saveCategory = async () => {
     if (!editingCategory?.name.trim()) return setError('分类名称不能为空。')
-    const value = { ...editingCategory, name: editingCategory.name.trim() }
+    const value = { ...editingCategory, name: editingCategory.name.trim(), emoji: getCategoryGroup(editingCategory) }
     await run(async () => {
       await repository.saveCategory(value, data)
       setData((current) => ({
@@ -292,7 +293,7 @@ export function AdminPanel({ data, setData, cloudMode, userEmail, onClose, onSig
               <div className="table-head"><span>分类</span><span>链接数</span><span>状态</span><span>排序</span><span>操作</span></div>
               {categories.map((category) => (
                 <div className="table-row" key={category.id}>
-                  <span className="category-cell"><i>{category.emoji}</i><strong>{category.name}</strong></span>
+                  <span className="category-cell"><span><strong>{category.name}</strong><small>{getCategoryGroup(category)}</small></span></span>
                   <span>{links.filter((link) => link.category_id === category.id).length}</span>
                   <button className={`status-pill ${category.is_visible ? 'visible' : ''}`} onClick={() => toggleCategory(category)}>{category.is_visible ? <Eye size={14} /> : <EyeOff size={14} />}{category.is_visible ? '显示' : '隐藏'}</button>
                   <span className="order-actions"><button onClick={() => moveCategory(category.id, -1)}><ArrowUp size={15} /></button><button onClick={() => moveCategory(category.id, 1)}><ArrowDown size={15} /></button></span>
@@ -339,7 +340,7 @@ export function AdminPanel({ data, setData, cloudMode, userEmail, onClose, onSig
 
       {editingCategory && (
         <div className="editor-backdrop" onMouseDown={(event) => event.target === event.currentTarget && setEditingCategory(null)}>
-          <section className="editor-panel"><header><div><span>CATEGORY</span><h2>{data.categories.some((item) => item.id === editingCategory.id) ? '编辑分类' : '新建分类'}</h2></div><button onClick={() => setEditingCategory(null)}><X /></button></header><div className="editor-fields"><label><span>分类名称</span><input autoFocus value={editingCategory.name} onChange={(event) => setEditingCategory({ ...editingCategory, name: event.target.value })} placeholder="例如：AI 工具" /></label><label><span>分类标识</span><input maxLength={2} value={editingCategory.emoji} onChange={(event) => setEditingCategory({ ...editingCategory, emoji: event.target.value })} placeholder="AI" /></label><label className="switch-field"><input type="checkbox" checked={editingCategory.is_visible} onChange={(event) => setEditingCategory({ ...editingCategory, is_visible: event.target.checked })} /><span>在公开页面显示此分类</span></label></div><footer><button onClick={() => setEditingCategory(null)}>取消</button><button className="primary-button" disabled={busy} onClick={saveCategory}>保存分类</button></footer></section>
+          <section className="editor-panel"><header><div><span>CATEGORY</span><h2>{data.categories.some((item) => item.id === editingCategory.id) ? '编辑小分类' : '新建小分类'}</h2></div><button onClick={() => setEditingCategory(null)}><X /></button></header><div className="editor-fields"><label><span>小分类名称</span><input autoFocus value={editingCategory.name} onChange={(event) => setEditingCategory({ ...editingCategory, name: event.target.value })} placeholder="例如：AI 工具" /></label><label><span>所属大分类</span><select value={getCategoryGroup(editingCategory)} onChange={(event) => setEditingCategory({ ...editingCategory, emoji: event.target.value })}>{CATEGORY_GROUPS.map((group) => <option key={group} value={group}>{group}</option>)}</select></label><label className="switch-field"><input type="checkbox" checked={editingCategory.is_visible} onChange={(event) => setEditingCategory({ ...editingCategory, is_visible: event.target.checked })} /><span>在公开页面显示此分类</span></label></div><footer><button onClick={() => setEditingCategory(null)}>取消</button><button className="primary-button" disabled={busy} onClick={saveCategory}>保存分类</button></footer></section>
         </div>
       )}
 
@@ -373,4 +374,3 @@ function SettingsForm({ settings, onSave, busy }: { settings: SiteSettings; onSa
     </div>
   )
 }
-

@@ -3,11 +3,14 @@ import {
   ArrowUpRight,
   LayoutGrid,
   Menu,
+  Moon,
   Search,
   Settings2,
   Sparkles,
+  Sun,
   X,
 } from 'lucide-react'
+import { CATEGORY_GROUPS, getCategoryGroup, type CategoryGroup } from '../lib/categoryGroups'
 import type { NavigationData } from '../types'
 
 type Props = {
@@ -15,10 +18,20 @@ type Props = {
   onOpenAdmin: () => void
 }
 
+type Theme = 'light' | 'dark'
+
+const getInitialTheme = (): Theme => {
+  const saved = localStorage.getItem('hjcm-theme')
+  if (saved === 'light' || saved === 'dark') return saved
+  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+}
+
 export function PublicSite({ data, onOpenAdmin }: Props) {
   const [query, setQuery] = useState('')
-  const [activeCategory, setActiveCategory] = useState('all')
+  const [activeGroup, setActiveGroup] = useState<CategoryGroup>('日常')
+  const [activeCategory, setActiveCategory] = useState('')
   const [menuOpen, setMenuOpen] = useState(false)
+  const [theme, setTheme] = useState<Theme>(getInitialTheme)
 
   const categories = useMemo(
     () => data.categories.filter((item) => item.is_visible).sort((a, b) => a.order_index - b.order_index),
@@ -30,16 +43,26 @@ export function PublicSite({ data, onOpenAdmin }: Props) {
     [data.links],
   )
 
-  const categoryCounts = useMemo(
-    () => new Map(categories.map((category) => [
-      category.id,
-      links.filter((link) => link.category_id === category.id).length,
-    ])),
+  const normalizedQuery = query.trim().toLocaleLowerCase()
+
+  const groupSummaries = useMemo(
+    () => CATEGORY_GROUPS.map((group) => {
+      const groupCategoryIds = new Set(categories.filter((category) => getCategoryGroup(category) === group).map((category) => category.id))
+      return {
+        name: group,
+        categories: categories.filter((category) => groupCategoryIds.has(category.id)),
+        linkCount: links.filter((link) => groupCategoryIds.has(link.category_id)).length,
+      }
+    }),
     [categories, links],
   )
 
-  const normalizedQuery = query.trim().toLocaleLowerCase()
-  const filteredGroups = categories
+  const childCategories = groupSummaries.find((group) => group.name === activeGroup)?.categories ?? []
+  const displayedCategories = normalizedQuery
+    ? categories
+    : childCategories
+
+  const filteredGroups = displayedCategories
     .map((category) => ({
       category,
       links: links.filter((link) => {
@@ -54,10 +77,10 @@ export function PublicSite({ data, onOpenAdmin }: Props) {
     .filter((group) => group.links.length > 0)
 
   useEffect(() => {
-    if (normalizedQuery) return
+    if (normalizedQuery || filteredGroups.length === 0) return
 
-    const sections = categories
-      .map((category) => document.getElementById(`section-${category.id}`))
+    const sections = filteredGroups
+      .map(({ category }) => document.getElementById(`section-${category.id}`))
       .filter((section): section is HTMLElement => Boolean(section))
 
     const observer = new IntersectionObserver(
@@ -67,12 +90,12 @@ export function PublicSite({ data, onOpenAdmin }: Props) {
           .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)[0]
         if (visible) setActiveCategory(visible.target.id.replace('section-', ''))
       },
-      { rootMargin: '-88px 0px -70% 0px', threshold: 0 },
+      { rootMargin: '-150px 0px -68% 0px', threshold: 0 },
     )
 
     sections.forEach((section) => observer.observe(section))
     return () => observer.disconnect()
-  }, [categories, normalizedQuery])
+  }, [filteredGroups, normalizedQuery])
 
   useEffect(() => {
     const focusSearch = (event: KeyboardEvent) => {
@@ -85,25 +108,41 @@ export function PublicSite({ data, onOpenAdmin }: Props) {
     return () => window.removeEventListener('keydown', focusSearch)
   }, [])
 
+  const selectGroup = (group: CategoryGroup) => {
+    setActiveGroup(group)
+    setActiveCategory('')
+    setQuery('')
+    setMenuOpen(false)
+    document.getElementById('content-start')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+
   const selectCategory = (id: string) => {
     setActiveCategory(id)
     setMenuOpen(false)
-    const target = id === 'all' ? document.getElementById('directory-top') : document.getElementById(`section-${id}`)
-    target?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    document.getElementById(`section-${id}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+
+  const toggleTheme = () => {
+    const nextTheme = theme === 'light' ? 'dark' : 'light'
+    setTheme(nextTheme)
+    localStorage.setItem('hjcm-theme', nextTheme)
   }
 
   return (
-    <div className="site-shell" style={{ '--brand': data.settings.accent } as React.CSSProperties}>
+    <div className="site-shell" data-theme={theme} style={{ '--brand': data.settings.accent } as React.CSSProperties}>
       <header className="topbar">
-        <a className="brand" href="#directory-top" aria-label="返回顶部">
+        <a className="brand" href="#content-start" aria-label="返回顶部">
           <span className="brand-mark">{data.settings.logo_text}</span>
           <span className="brand-copy">
             <strong>{data.settings.title}</strong>
-            <small>{categories.length} 个分类 · {links.length} 个站点</small>
+            <small>{categories.length} 个小分类 · {links.length} 个站点</small>
           </span>
         </a>
 
         <nav className="top-actions" aria-label="页面操作">
+          <button className="theme-toggle" onClick={toggleTheme} type="button" aria-label={theme === 'light' ? '切换到夜间模式' : '切换到日间模式'} title={theme === 'light' ? '夜间模式' : '日间模式'}>
+            {theme === 'light' ? <Moon size={16} /> : <Sun size={16} />}
+          </button>
           <button className="ghost-button" onClick={onOpenAdmin} type="button">
             <Settings2 size={16} /> 管理后台
           </button>
@@ -120,42 +159,35 @@ export function PublicSite({ data, onOpenAdmin }: Props) {
 
       <div className="mobile-category-bar">
         <button type="button" onClick={() => setMenuOpen(!menuOpen)}>
-          <LayoutGrid size={15} /> 浏览分类
+          <LayoutGrid size={15} /> 大分类
         </button>
-        <span>{activeCategory === 'all' ? '全部分类' : categories.find((item) => item.id === activeCategory)?.name}</span>
+        <span>{activeGroup}</span>
       </div>
 
       <div className={`mobile-category-drawer ${menuOpen ? 'is-open' : ''}`}>
-        <button type="button" className={activeCategory === 'all' ? 'active' : ''} onClick={() => selectCategory('all')}>
-          <span>全部分类</span><small>{links.length}</small>
-        </button>
-        {categories.map((category) => (
-          <button type="button" key={category.id} className={activeCategory === category.id ? 'active' : ''} onClick={() => selectCategory(category.id)}>
-            <span>{category.emoji} {category.name}</span><small>{categoryCounts.get(category.id)}</small>
+        {groupSummaries.map((group) => (
+          <button type="button" key={group.name} className={activeGroup === group.name ? 'active' : ''} onClick={() => selectGroup(group.name)}>
+            <span>{group.name}</span><small>{group.linkCount}</small>
           </button>
         ))}
       </div>
 
-      <main className="directory-layout" id="directory-top">
+      <main className="directory-layout">
         <aside className="category-sidebar">
-          <div className="sidebar-label"><LayoutGrid size={14} /> 站点分类</div>
-          <button type="button" className={activeCategory === 'all' ? 'active' : ''} onClick={() => selectCategory('all')}>
-            <span className="category-symbol">全</span><span>全部分类</span><small>{links.length}</small>
-          </button>
-          {categories.map((category) => (
-            <button type="button" key={category.id} className={activeCategory === category.id ? 'active' : ''} onClick={() => selectCategory(category.id)}>
-              <span className="category-symbol">{category.emoji}</span><span>{category.name}</span>
-              <small>{categoryCounts.get(category.id)}</small>
+          <div className="sidebar-label">大分类</div>
+          {groupSummaries.map((group) => (
+            <button type="button" key={group.name} className={activeGroup === group.name ? 'active' : ''} onClick={() => selectGroup(group.name)}>
+              <span>{group.name}</span><small>{group.linkCount}</small>
             </button>
           ))}
         </aside>
 
-        <div className="directory-content">
+        <div className="directory-content" id="content-start">
           <section className="directory-intro">
             <span className="eyebrow"><Sparkles size={14} /> {data.settings.announcement}</span>
             <div className="intro-copy">
               <div>
-                <h1>{data.settings.title}</h1>
+                <h1>{activeGroup}</h1>
                 <p>{data.settings.subtitle}</p>
               </div>
               <label className="search-box" htmlFor="site-search">
@@ -164,7 +196,7 @@ export function PublicSite({ data, onOpenAdmin }: Props) {
                   id="site-search"
                   value={query}
                   onChange={(event) => setQuery(event.target.value)}
-                  placeholder="搜索网站、工具或关键词"
+                  placeholder="搜索全部网站、工具或关键词"
                   aria-label="搜索导航内容"
                 />
                 {query ? (
@@ -172,7 +204,19 @@ export function PublicSite({ data, onOpenAdmin }: Props) {
                 ) : <kbd>⌘ K</kbd>}
               </label>
             </div>
+
+            {!normalizedQuery && (
+              <nav className="subcategory-tabs" aria-label={`${activeGroup}的小分类`}>
+                {childCategories.map((category) => (
+                  <button type="button" key={category.id} className={activeCategory === category.id ? 'active' : ''} onClick={() => selectCategory(category.id)}>
+                    {category.name}
+                  </button>
+                ))}
+              </nav>
+            )}
           </section>
+
+          {normalizedQuery && <p className="search-result-label">全站搜索结果 · {filteredGroups.reduce((total, group) => total + group.links.length, 0)} 个站点</p>}
 
           {filteredGroups.length ? filteredGroups.map(({ category, links: groupLinks }) => (
             <section className="link-section" id={`section-${category.id}`} key={category.id}>
@@ -182,7 +226,7 @@ export function PublicSite({ data, onOpenAdmin }: Props) {
                   <h2>{category.name}</h2>
                   <small>{groupLinks.length} 个站点</small>
                 </div>
-                <button type="button" onClick={() => selectCategory('all')}>返回顶部</button>
+                <button type="button" onClick={() => document.getElementById('content-start')?.scrollIntoView({ behavior: 'smooth' })}>返回顶部</button>
               </header>
               <div className="link-grid">
                 {groupLinks.map((link) => (
@@ -204,9 +248,9 @@ export function PublicSite({ data, onOpenAdmin }: Props) {
           )) : (
             <div className="empty-search">
               <Search size={28} />
-              <h2>没有找到“{query}”</h2>
-              <p>换个关键词试试，或者前往管理后台添加它。</p>
-              <button type="button" onClick={() => setQuery('')}>清除搜索</button>
+              <h2>{normalizedQuery ? `没有找到“${query}”` : '这个分类暂时没有内容'}</h2>
+              <p>{normalizedQuery ? '换个关键词试试，或者前往管理后台添加它。' : '可以在管理后台给这个大分类添加小分类和链接。'}</p>
+              {normalizedQuery && <button type="button" onClick={() => setQuery('')}>清除搜索</button>}
             </div>
           )}
         </div>

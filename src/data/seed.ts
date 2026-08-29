@@ -8,7 +8,7 @@ type RawCategory = {
 
 const rawCategories: RawCategory[] = [
   {
-    name: '常用推荐', emoji: '✦', links: [
+    name: '常用推荐', emoji: '日常', links: [
       ['百度', 'https://www.baidu.com/', '国产搜索'],
       ['QQ 邮箱', 'https://mail.qq.com/', '腾讯 QQ 邮箱'],
       ['开源中国', 'https://www.oschina.net/', '中文开源技术交流社区'],
@@ -20,7 +20,7 @@ const rawCategories: RawCategory[] = [
     ],
   },
   {
-    name: '国产 AI', emoji: '智', links: [
+    name: '国产 AI', emoji: '工具', links: [
       ['即梦', 'https://jimeng.jianying.com/', '字节跳动旗下 AI 创作工具'],
       ['DeepSeek', 'https://chat.deepseek.com/', '国产通用 AI 助手'],
       ['腾讯混元 3D', 'https://3d.hunyuan.tencent.com/', '腾讯旗下 AI 3D 建模'],
@@ -29,7 +29,7 @@ const rawCategories: RawCategory[] = [
     ],
   },
   {
-    name: '国外 AI', emoji: 'AI', links: [
+    name: '国外 AI', emoji: '工具', links: [
       ['Gemini', 'https://gemini.google.com/', 'Google AI 助手'],
       ['Sora', 'https://sora.chatgpt.com/', 'OpenAI 视频生成工具'],
       ['Viggle', 'https://viggle.ai/login', 'AI 人物动画创作'],
@@ -38,7 +38,7 @@ const rawCategories: RawCategory[] = [
     ],
   },
   {
-    name: '影音视频', emoji: '▶', links: [
+    name: '影音视频', emoji: '后期', links: [
       ['抖音网页版', 'https://www.douyin.com/', '记录美好生活'],
       ['腾讯视频', 'https://v.qq.com/', '海量视频在线观看'],
       ['MX 动漫', 'https://www.mxdm.xyz/', '动漫内容站点'],
@@ -56,13 +56,13 @@ const rawCategories: RawCategory[] = [
     ],
   },
   {
-    name: '游戏竞技', emoji: '游', links: [
+    name: '游戏竞技', emoji: '日常', links: [
       ['LOL 布锅锅', 'https://voice.buguoguo.cn/', '英雄联盟语音内容'],
       ['台服战地', 'https://ava.mangot5.com/ava/index', '台服 AVA 战地之王'],
     ],
   },
   {
-    name: '办公学习', emoji: '学', links: [
+    name: '办公学习', emoji: '日常', links: [
       ['有道词典', 'https://www.youdao.com/', '免费多语种在线词典'],
       ['有道翻译', 'https://fanyi.youdao.com/', '在线翻译工具'],
       ['谷歌翻译', 'https://translate.google.cn/', 'Google 在线翻译'],
@@ -70,7 +70,7 @@ const rawCategories: RawCategory[] = [
     ],
   },
   {
-    name: '网盘资源', emoji: '云', links: [
+    name: '网盘资源', emoji: '工具', links: [
       ['百度网盘', 'https://pan.baidu.com/', '云存储与资源分享'],
       ['阿里云盘', 'https://www.aliyundrive.com/', '你的数字世界'],
       ['天翼云盘', 'https://cloud.189.cn/', '家庭云与文件备份'],
@@ -78,7 +78,7 @@ const rawCategories: RawCategory[] = [
     ],
   },
   {
-    name: '图标素材', emoji: '◇', links: [
+    name: '图标素材', emoji: '素材', links: [
       ['Iconfinder', 'https://www.iconfinder.com/', '免费与付费矢量图标'],
       ['Iconfont', 'https://www.iconfont.cn/', '阿里巴巴矢量图标库'],
       ['Iconmonstr', 'https://iconmonstr.com/', '简洁免费图标'],
@@ -95,7 +95,7 @@ const rawCategories: RawCategory[] = [
     ],
   },
   {
-    name: '图标设计', emoji: '标', links: [
+    name: '图标设计', emoji: '设计', links: [
       ['Iconsfeed', 'https://www.iconsfeed.com/', 'iOS 图标画廊'],
       ['iOS Icon Gallery', 'https://www.iosicongallery.com/', '优秀 iOS 图标设计'],
       ['World Vector Logo', 'https://worldvectorlogo.com/', '品牌矢量 Logo 下载'],
@@ -103,7 +103,7 @@ const rawCategories: RawCategory[] = [
     ],
   },
   {
-    name: '平面素材', emoji: '图', links: [
+    name: '平面素材', emoji: '素材', links: [
       ['花瓣网', 'https://huaban.com/', '设计师灵感与素材平台'],
       ['Freepik', 'https://www.freepik.com/', '矢量、PSD 与图片素材'],
       ['Wallhalla', 'https://wallhalla.com/', '高清壁纸资源'],
@@ -121,13 +121,13 @@ const rawCategories: RawCategory[] = [
     ],
   },
   {
-    name: '音效资源', emoji: '声', links: [
+    name: '音效资源', emoji: '后期', links: [
       ['爱给网', 'https://www.aigei.com/', '音效、配乐与视频素材'],
       ['Freesound', 'https://freesound.org/', '开放声音素材社区'],
     ],
   },
   {
-    name: '字体资源', emoji: '字', links: [
+    name: '字体资源', emoji: '素材', links: [
       ['字体天下', 'https://www.fonts.net.cn/', '中文字体下载'],
       ['Google Fonts', 'https://fonts.google.com/', '开放 Web 字体'],
       ['Adobe Fonts', 'https://fonts.adobe.com/', '专业字体服务'],
@@ -147,7 +147,7 @@ const rawCategories: RawCategory[] = [
     ],
   },
   {
-    name: '图形创意', emoji: '创', links: [
+    name: '图形创意', emoji: '设计', links: [
       ['Photoshop', 'https://www.adobe.com/cn/products/photoshop.html', '图像编辑与创意设计'],
       ['Affinity', 'https://affinity.serif.com/', '专业创意设计软件'],
       ['Illustrator', 'https://www.adobe.com/cn/products/illustrator/', '矢量图形与插图'],
@@ -158,7 +158,7 @@ const rawCategories: RawCategory[] = [
     ],
   },
   {
-    name: '界面设计', emoji: '界', links: [
+    name: '界面设计', emoji: '设计', links: [
       ['Sketch', 'https://www.sketch.com/', '数字产品设计工具'],
       ['Adobe XD', 'https://www.adobe.com/products/xd.html', '界面设计与原型工具'],
       ['InVision', 'https://www.invisionapp.com/', '设计原型与协作'],
@@ -168,7 +168,7 @@ const rawCategories: RawCategory[] = [
     ],
   },
   {
-    name: '在线配色', emoji: '色', links: [
+    name: '在线配色', emoji: '设计', links: [
       ['Khroma', 'https://www.khroma.co/', 'AI 配色发现工具'],
       ['UI Gradients', 'https://uigradients.com/', '漂亮的渐变配色'],
       ['Gradients.io', 'https://gradients.io/', '设计师渐变收藏'],
@@ -187,7 +187,7 @@ const rawCategories: RawCategory[] = [
     ],
   },
   {
-    name: '在线工具', emoji: '具', links: [
+    name: '在线工具', emoji: '工具', links: [
       ['TinyPNG', 'https://tinypng.com/', '高质量图片压缩'],
       ['GoQR', 'https://goqr.me/', '在线二维码生成器'],
       ['Ezgif', 'https://ezgif.com/', '在线 GIF 制作与编辑'],
@@ -198,7 +198,7 @@ const rawCategories: RawCategory[] = [
     ],
   },
   {
-    name: '浏览器插件', emoji: '插', links: [
+    name: '浏览器插件', emoji: '编程', links: [
       ['Wappalyzer', 'https://www.wappalyzer.com/', '识别网站技术栈'],
       ['Panda', 'https://usepanda.com/', '设计与科技资讯阅读器'],
       ['Sizzy', 'https://sizzy.co/', '响应式网站开发工具'],
@@ -208,13 +208,13 @@ const rawCategories: RawCategory[] = [
     ],
   },
   {
-    name: '资讯书籍', emoji: '阅', links: [
+    name: '资讯书籍', emoji: '外语', links: [
       ['微信读书', 'https://weread.qq.com/', '微信读书网页版'],
       ['书栈网', 'https://www.bookstack.cn/', 'IT 开源编程书籍阅读'],
     ],
   },
   {
-    name: '博客论坛', emoji: '谈', links: [
+    name: '博客论坛', emoji: '其他', links: [
       ['Inoreader', 'https://www.inoreader.com/', '新闻与 RSS 订阅阅读器'],
       ['Hacker News', 'https://news.ycombinator.com/', '科技与创业新闻社区'],
       ['经管之家', 'https://bbs.pinggu.org/', '经济管理与数据分析社区'],
@@ -223,7 +223,7 @@ const rawCategories: RawCategory[] = [
     ],
   },
   {
-    name: '设计规范', emoji: '规', links: [
+    name: '设计规范', emoji: '设计', links: [
       ['Design Guidelines', 'https://www.designguidelines.co/', '产品设计规范集合'],
       ['Awesome Design Systems', 'https://github.com/alexpate/awesome-design-systems', '优秀设计系统集合'],
       ['Material Design', 'https://m3.material.io/', 'Google Material Design'],
@@ -232,7 +232,7 @@ const rawCategories: RawCategory[] = [
     ],
   },
   {
-    name: '视频教程', emoji: '课', links: [
+    name: '视频教程', emoji: '后期', links: [
       ['Photoshop Lady', 'https://www.photoshoplady.com/', 'Photoshop 教程集合'],
       ['Doyoudo', 'https://www.doyoudo.com/', '创意设计软件学习平台'],
       ['没位道', 'https://www.c945.com/web-ui-tutorial/', 'Web UI 视频公开课'],
@@ -280,4 +280,3 @@ export const seedData: NavigationData = {
     accent: '#6d5dfc',
   },
 }
-
